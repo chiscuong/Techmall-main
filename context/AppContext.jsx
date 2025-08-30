@@ -59,6 +59,26 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  // 🟢 Thêm đoạn này để push user mới lên MongoDB
+  const createUserIfNotExists = async () => {
+    if (!user) return;
+    try {
+      const token = await getToken();
+
+      await axios.post(
+        "/api/user/create",
+        {
+          email: user.primaryEmailAddress?.emailAddress,
+          name: user.fullName,
+          image: user.imageUrl,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("Create user error:", error.message);
+    }
+  };
+
   const addToCart = async (itemId) => {
     let cartData = structuredClone(cartItems);
     if (cartData[itemId]) {
@@ -134,6 +154,7 @@ export const AppContextProvider = (props) => {
 
   useEffect(() => {
     if (user) {
+      createUserIfNotExists(); // 🟢 Gọi hàm này khi user mới login/signup
       fetchUserData();
     }
   }, [user]);
