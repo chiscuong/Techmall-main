@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-p-200/50 /* hoặc bg-gray-100 / bg-black / bất kỳ màu nào */
+}
