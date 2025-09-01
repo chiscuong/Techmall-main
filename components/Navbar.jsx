@@ -12,8 +12,8 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-p-200 bg-gradient-to-r from-p-300/10 via-p-300 to-p-300/20 ">
       <div>
-        <a href="#" className=" text-3xl underline-center ">
-          <h2 className="bg-gradient-to-l from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text font-bold ">
+        <a href="/" className=" text-3xl underline-center ">
+          <h2 className="bg-gradient-to-r from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text font-bold ">
             TechMall
           </h2>
         </a>

@@ -16,7 +16,9 @@ export async function GET(request) {
         Address.length
         Product.length
 
-        const orders = await Order.find({userId}).populate('address items.product')
+        const orders = await Order.find({userId})
+        .populate('address')
+        .populate('items.product')
 
         return NextResponse.json({success:true,orders})
 
