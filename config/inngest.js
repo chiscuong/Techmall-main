@@ -3,6 +3,8 @@ import connectDB from "./db";
 import User from "@/models/User";
 import { UserProfile } from "@clerk/nextjs";
 import Order from "@/models/Order";
+import mongoose from "mongoose";
+
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "quickcart-next" });
