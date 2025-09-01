@@ -22,6 +22,7 @@ const ProductCard = ({ product }) => {
 
   const handleBuyClick = (e) => {
     e.stopPropagation();
+    router.push("/product/" + product._id);
     // Handle buy action
   };
 
