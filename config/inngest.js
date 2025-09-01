@@ -65,13 +65,7 @@ async ({event}) => {
     await User.findByIdAndDelete(id)
 }
 )
-
-//inngest function to create user's order database
-import { inngest } from "@/config/inngest";
-import connectDB from "./db";
-import Order from "@/models/Order";
-import User from "@/models/User";
-import mongoose from "mongoose";
+//
 
 export const createUserOrder = inngest.createFunction(
   {
