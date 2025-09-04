@@ -5,6 +5,7 @@ import { assets } from "../../assets/assets";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react"; // icon hamburger & close
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="w-full bg-white border-b border-p-200 px-4 md:px-8 py-4 flex items-center justify-between">
+    <nav className="relative w-full bg-white border-b border-p-200 px-4 md:px-8 py-4 flex items-center justify-between">
       {/* Logo */}
       <div className="text-3xl font-bold bg-gradient-to-r from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text">
         TechMall
@@ -36,7 +37,7 @@ const Navbar = () => {
             <Link
               key={item.name}
               href={item.path}
-              className={`flex items-center gap-2 px-3 py-2 rounded ${
+              className={`flex items-center gap-2 px-3 py-2 rounded transition ${
                 isActive
                   ? "bg-sc-500/10 border-b-2 border-sc-500"
                   : "hover:bg-p-200/90"
@@ -53,32 +54,32 @@ const Navbar = () => {
         })}
       </div>
 
-      {/* Right side - Hamburger (mobile) + Logout (all screens) */}
+      {/* Right side */}
       <div className="flex items-center gap-4">
-        {/* Mobile Hamburger - chỉ hiện trên mobile */}
+        {/* Mobile Hamburger */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden p-2 rounded-md hover:bg-p-200/30"
         >
-          <Image src={assets.menu_icon} alt="menu" className="w-6 h-6" />
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Logout Button - hiện trên tất cả màn hình */}
+        {/* Logout */}
         <button className="bg-gradient-to-r from-p-400 to-p-800 shadow-lg hover:shadow-2xl text-neu-700 hover:text-white px-4 py-2 rounded-full text-xs sm:text-sm">
           <a href="/">Logout</a>
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown - chỉ hiện khi isMobileMenuOpen = true */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-white shadow-md flex flex-col md:hidden border-b border-p-200 z-50">
+        <div className="absolute top-full left-0 w-full bg-white shadow-md flex flex-col md:hidden border-b border-p-200 z-50 animate-slideDown">
           {menuItems.map((item) => {
             const isActive = pathname.startsWith(item.path);
             return (
               <Link
                 key={item.name}
                 href={item.path}
-                className={`flex items-center gap-2 px-4 py-3 border-b border-gray-200 ${
+                className={`flex items-center gap-2 px-4 py-3 border-b border-gray-200 transition ${
                   isActive ? "bg-sc-500/10 font-semibold" : "hover:bg-p-200/30"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
