@@ -18,6 +18,7 @@ const Navbar = () => {
       icon: assets.product_list_icon,
     },
     { name: "Orders", path: "/seller/orders", icon: assets.order_icon },
+    { name: "Messages", path: "/seller/messages", icon: assets.message_icon },
   ];
 
   return (

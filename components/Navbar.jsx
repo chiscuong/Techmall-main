@@ -1,16 +1,28 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { assets, BagIcon, BoxIcon, CartIcon, HomeIcon } from "@/assets/assets";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
+
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
   const { openSignIn } = useClerk();
+  const [isShopOpen, setIsShopOpen] = useState(false);
+
+  const categories = [
+    { value: "Earphone", icon: "🎧" },
+    { value: "Headphone", icon: "🎵" },
+    { value: "Watch", icon: "⌚" },
+    { value: "Smartphone", icon: "📱" },
+    { value: "Laptop", icon: "💻" },
+    { value: "Camera", icon: "📸" },
+    { value: "Accessories", icon: "🔌" },
+  ];
 
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-p-200 bg-gradient-to-r from-p-300/10 via-p-300 to-p-300/20 ">
+    <nav className="relative z-[100] flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-p-200 bg-gradient-to-r from-p-300/10 via-p-300 to-p-300/20">
       <div>
         <a href="/" className=" text-3xl underline-center ">
           <h2 className="bg-gradient-to-r from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text font-bold ">
@@ -18,23 +30,26 @@ const Navbar = () => {
           </h2>
         </a>
       </div>
+
       <div className="flex items-center gap-4 lg:gap-8 max-md:hidden">
         <Link href="/" className="hover:text-p-500 transition underline-center">
           Home
         </Link>
-        <Link
-          href="/all-products"
-          className="hover:text-p-500 transition underline-center"
-        >
+
+        <Link href="/all-products" className="underline-center">
           Shop
         </Link>
+
         <Link
           href="/aboutus"
           className="hover:text-p-500 underline-center transition"
         >
           About Us
         </Link>
-        <Link href="/" className="hover:text-p-500 underline-center transition">
+        <Link
+          href="/contact"
+          className="hover:text-p-500 underline-center transition"
+        >
           Contact
         </Link>
 

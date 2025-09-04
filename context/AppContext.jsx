@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+// ✅ Cấu hình axios để luôn gửi cookies
+axios.defaults.withCredentials = true;
+
 export const AppContext = createContext();
 
 export const useAppContext = () => {
@@ -16,7 +19,7 @@ export const AppContextProvider = (props) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY;
   const router = useRouter();
 
-  const { user } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser(); // ✅ Thêm isLoaded, isSignedIn
   const { getToken } = useAuth();
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);
@@ -38,44 +41,88 @@ export const AppContextProvider = (props) => {
 
   const fetchUserData = async () => {
     try {
-      if (user.publicMetadata.role === "seller") {
+      // ✅ Kiểm tra role trước khi set
+      if (user?.publicMetadata?.role === "seller") {
         setIsSeller(true);
       }
 
-      const token = await getToken();
-
-      const { data } = await axios.get("/api/user/data", {
-        headers: { Authorization: `Bearer ${token}` },
+      console.log("🔍 Fetching user data...", {
+        isSignedIn,
+        userId: user?.id,
+        hasUser: !!user,
       });
+
+      // ✅ Thử dùng fetch thay vì axios
+      const response = await fetch("/api/user/data", {
+        method: "GET",
+        credentials: "include", // Đảm bảo gửi cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("🔍 API Response:", { status: response.status, data });
 
       if (data.success) {
         setUserData(data.user);
-        setCartItems(data.user.cartItems);
+        setCartItems(data.user.cartItems || {}); // ✅ Default to empty object
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("❌ Fetch user data error:", error);
+      toast.error(error.message || "Failed to fetch user data");
     }
   };
 
-  // 🟢 Thêm đoạn này để push user mới lên MongoDB
+  // ✅ Debug user object và tạo user nếu chưa tồn tại
   const createUserIfNotExists = async () => {
     if (!user) return;
     try {
-      const token = await getToken();
+      // ✅ THÊM ĐOẠN NÀY để debug
+      console.log("🔍 Full user object:", user);
+      console.log("🔍 User data to send:", {
+        email: user.primaryEmailAddress?.emailAddress,
+        name: user.fullName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        image: user.imageUrl,
+        hasImage: !!user.imageUrl,
+        publicMetadata: user.publicMetadata,
+      });
 
-      await axios.post(
-        "/api/user/create",
-        {
-          email: user.primaryEmailAddress?.emailAddress,
-          name: user.fullName,
-          image: user.imageUrl,
+      console.log("🔍 Creating user if not exists...", user.id);
+
+      // ✅ Dùng fetch thay vì axios
+      const response = await fetch("/api/user/create", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        body: JSON.stringify({
+          email: user.primaryEmailAddress?.emailAddress,
+          name:
+            user.fullName ||
+            `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          image: user.imageUrl,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("🔍 Create user response:", {
+        status: response.status,
+        data,
+      });
     } catch (error) {
-      console.error("Create user error:", error.message);
+      console.error("Create user error:", error);
     }
   };
 
@@ -90,13 +137,22 @@ export const AppContextProvider = (props) => {
 
     if (user) {
       try {
-        const token = await getToken();
-        await axios.post(
-          "/api/cart/update",
-          { cartData },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("Item added to cart");
+        // ✅ Dùng fetch cho consistency
+        const response = await fetch("/api/cart/update", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cartData }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          toast.success("Item added to cart");
+        } else {
+          toast.error(data.message);
+        }
       } catch (error) {
         toast.error(error.message);
       }
@@ -114,13 +170,22 @@ export const AppContextProvider = (props) => {
 
     if (user) {
       try {
-        const token = await getToken();
-        await axios.post(
-          "/api/cart/update",
-          { cartData },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("Cart Updated");
+        // ✅ Dùng fetch cho consistency
+        const response = await fetch("/api/cart/update", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cartData }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          toast.success("Cart Updated");
+        } else {
+          toast.error(data.message);
+        }
       } catch (error) {
         toast.error(error.message);
       }
@@ -152,15 +217,29 @@ export const AppContextProvider = (props) => {
     fetchProductData();
   }, []);
 
+  // ✅ Chỉ gọi API khi user đã fully loaded và signed in
   useEffect(() => {
-    if (user) {
+    if (isLoaded && isSignedIn && user) {
+      console.log("✅ User loaded and signed in, calling APIs...");
       createUserIfNotExists(); // 🟢 Gọi hàm này khi user mới login/signup
       fetchUserData();
+    } else if (isLoaded && !isSignedIn) {
+      console.log("❌ User not signed in");
+      // Reset state khi user logout
+      setUserData(false);
+      setCartItems({});
+      setIsSeller(false);
     }
-  }, [user]);
+  }, [isLoaded, isSignedIn, user]);
+
+  // ✅ Show loading cho đến khi Clerk load xong
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   const value = {
     user,
+    isSignedIn, // ✅ Expose này để components khác dùng
     getToken,
     currency,
     router,

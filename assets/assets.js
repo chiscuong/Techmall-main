@@ -51,7 +51,7 @@ import videoBanner2 from "@/assets/bannervideo2.webm"
 import fearture1 from "@/assets/fearture1.jpg"
 import fearture2 from "@/assets/fearture2.jpg"
 import fearture3 from "@/assets/fearture3.jpg"
-
+import message_icon from "@/assets/message_icon.jpg"
 
 export const assets = {
   logo,
@@ -107,7 +107,7 @@ export const assets = {
   fearture1,
   fearture2,
   fearture3,
-
+  message_icon,
 };
 
 export const BagIcon = () => {

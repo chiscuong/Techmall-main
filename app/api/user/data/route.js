@@ -1,52 +1,30 @@
-import connectDB from "@/config/db";
-import User from "@/models/User";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function GET(request) {
+export async function GET() {
   try {
-    const { userId, sessionId } = getAuth(request);
+    console.log("📌 [API START] /api/user/data called");
+
+    const { userId } = await auth();
+    console.log("👉 userId:", userId);
 
     if (!userId) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    await connectDB();
-
-    // Tìm user trong DB
-    let user = await User.findById(userId);
-
-    // Nếu chưa có thì tạo mới
-    if (!user) {
-      // Gọi Clerk API để lấy thông tin user
-      const res = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch user from Clerk");
+    // Mock data để test
+    return NextResponse.json({ 
+      success: true, 
+      user: {
+        _id: userId,
+        name: "Test User",
+        email: "test@example.com",
+        cartItems: {}
       }
+    });
 
-      const clerkUser = await res.json();
-
-      user = new User({
-        _id: clerkUser.id,
-        name: `${clerkUser.first_name || ""} ${clerkUser.last_name || ""}`.trim(),
-        email: clerkUser.email_addresses[0]?.email_address,
-        imageUrl: clerkUser.image_url,
-      });
-
-      await user.save();
-    }
-
-    return NextResponse.json({ success: true, user });
   } catch (error) {
-    console.error("User data error:", error);
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error("❌ API Error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
