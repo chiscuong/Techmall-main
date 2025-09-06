@@ -36,14 +36,6 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Quick Add to Cart Button */}
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={handleAddToCart}
-              className="bg-p-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-p-600 transition-colors shadow-lg"
-            >
-              Add to Cart
-            </button>
-          </div>
         </div>
       </Link>
 

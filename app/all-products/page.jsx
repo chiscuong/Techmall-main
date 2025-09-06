@@ -12,14 +12,15 @@ const AllProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const categories = [
-    { value: "All", icon: "🛍️" },
-    { value: "Earphone", icon: "🎧" },
-    { value: "Headphone", icon: "🎵" },
-    { value: "Watch", icon: "⌚" },
-    { value: "Smartphone", icon: "📱" },
-    { value: "Laptop", icon: "💻" },
-    { value: "Camera", icon: "📸" },
-    { value: "Accessories", icon: "🔌" },
+    { value: "All" },
+    { value: "Earphone" },
+    { value: "Headphone" },
+    { value: "Watch" },
+    { value: "Smartphone" },
+    { value: "Laptop" },
+    { value: "Camera" },
+    { value: "Accessories" },
+    { value: "Tablet" },
   ];
 
   useEffect(() => {

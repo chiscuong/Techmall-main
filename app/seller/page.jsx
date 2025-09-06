@@ -30,15 +30,31 @@ const AddProduct = () => {
   const [offerPrice, setOfferPrice] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [customColor, setCustomColor] = useState("");
+
+  const predefinedColors = [
+    { name: "Black", value: "#000000" },
+    { name: "White", value: "#FFFFFF" },
+    { name: "Red", value: "#EF4444" },
+    { name: "Blue", value: "#3B82F6" },
+    { name: "Green", value: "#10B981" },
+    { name: "Yellow", value: "#F59E0B" },
+    { name: "Purple", value: "#8B5CF6" },
+    { name: "Pink", value: "#EC4899" },
+    { name: "Gray", value: "#6B7280" },
+    { name: "Orange", value: "#F97316" },
+  ];
 
   const categories = [
-    { value: "Earphone", icon: "🎧" },
-    { value: "Headphone", icon: "🎵" },
-    { value: "Watch", icon: "⌚" },
-    { value: "Smartphone", icon: "📱" },
-    { value: "Laptop", icon: "💻" },
-    { value: "Camera", icon: "📸" },
-    { value: "Accessories", icon: "🔌" },
+    { value: "Earphone" },
+    { value: "Headphone" },
+    { value: "Watch" },
+    { value: "Smartphone" },
+    { value: "Laptop" },
+    { value: "Camera" },
+    { value: "Accessories" },
+    { value: "Tablet" },
   ];
 
   const handleDrag = (e) => {
@@ -75,6 +91,32 @@ const AddProduct = () => {
     setFiles(updatedFiles);
   };
 
+  const toggleColor = (color) => {
+    setSelectedColors((prev) => {
+      const exists = prev.find((c) => c.value === color.value);
+      if (exists) {
+        return prev.filter((c) => c.value !== color.value);
+      } else {
+        return [...prev, color];
+      }
+    });
+  };
+
+  const addCustomColor = () => {
+    if (customColor && !selectedColors.find((c) => c.value === customColor)) {
+      const newColor = {
+        name: `Custom ${customColor}`,
+        value: customColor,
+      };
+      setSelectedColors((prev) => [...prev, newColor]);
+      setCustomColor("");
+    }
+  };
+
+  const removeColor = (colorValue) => {
+    setSelectedColors((prev) => prev.filter((c) => c.value !== colorValue));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,6 +132,7 @@ const AddProduct = () => {
     formData.append("category", category);
     formData.append("price", price);
     formData.append("offerPrice", offerPrice);
+    formData.append("colors", JSON.stringify(selectedColors));
 
     for (let i = 0; i < files.length; i++) {
       formData.append("images", files[i]);
@@ -108,6 +151,7 @@ const AddProduct = () => {
         setCategory("Earphone");
         setPrice("");
         setOfferPrice("");
+        setSelectedColors([]);
       } else {
         toast.error(data.message);
       }
@@ -320,6 +364,112 @@ const AddProduct = () => {
                     </div>
                   )}
               </div>
+            </div>
+            {/* Color Selection Section */}
+            <div>
+              <label className="block text-lg font-semibold text-p-800 mb-4 flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-blue-500"></div>
+                Product Colors
+              </label>
+
+              {/* Predefined Colors */}
+              <div className="mb-6">
+                <p className="text-sm text-p-600 mb-3">
+                  Choose from predefined colors:
+                </p>
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
+                  {predefinedColors.map((color) => (
+                    <motion.div
+                      key={color.value}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`relative cursor-pointer`}
+                      onClick={() => toggleColor(color)}
+                    >
+                      <div
+                        className={`w-12 h-12 rounded-full border-4 transition-all duration-200 ${
+                          selectedColors.find((c) => c.value === color.value)
+                            ? "border-p-600 shadow-lg scale-110"
+                            : "border-gray-300 hover:border-p-400"
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        title={color.name}
+                      >
+                        {selectedColors.find(
+                          (c) => c.value === color.value
+                        ) && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Check
+                              size={20}
+                              className="text-white drop-shadow-lg"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Color Input */}
+              <div className="mb-6">
+                <p className="text-sm text-p-600 mb-3">
+                  Or add a custom color:
+                </p>
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1">
+                    <input
+                      type="color"
+                      value={customColor}
+                      onChange={(e) => setCustomColor(e.target.value)}
+                      className="w-full h-12 rounded-xl border-2 border-p-200 cursor-pointer"
+                    />
+                  </div>
+                  <motion.button
+                    type="button"
+                    onClick={addCustomColor}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-3 bg-p-600 text-white rounded-xl hover:bg-p-700 transition-colors"
+                    disabled={!customColor}
+                  >
+                    <Plus size={20} />
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Selected Colors Display */}
+              {selectedColors.length > 0 && (
+                <div>
+                  <p className="text-sm text-p-600 mb-3">
+                    Selected colors ({selectedColors.length}):
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedColors.map((color) => (
+                      <motion.div
+                        key={color.value}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="flex items-center gap-2 bg-p-50 border border-p-200 rounded-full px-3 py-2"
+                      >
+                        <div
+                          className="w-4 h-4 rounded-full border border-gray-300"
+                          style={{ backgroundColor: color.value }}
+                        ></div>
+                        <span className="text-sm text-p-700">{color.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeColor(color.value)}
+                          className="text-p-400 hover:text-p-600 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Description */}

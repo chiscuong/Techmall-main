@@ -7,12 +7,14 @@ import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "@clerk/nextjs";
 
 const ProductList = () => {
   const { router, getToken, user } = useAppContext();
-
+  const { user: clerkUser } = useUser();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(null); // Track which product is being deleted
 
   const fetchSellerProduct = async () => {
     try {
@@ -32,6 +34,51 @@ const ProductList = () => {
       toast.error(error.message);
     }
   };
+
+  // Delete product function - Send userId from Clerk
+  const deleteProduct = async (productId) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+      return;
+    }
+
+    if (!clerkUser?.id) {
+      toast.error("Vui lòng đăng nhập lại");
+      return;
+    }
+
+    try {
+      setDeleteLoading(productId);
+
+      console.log("Sending delete request with userId:", clerkUser.id);
+
+      // Send userId in request body as fallback for server auth
+      const { data } = await axios.delete(`/api/product/delete/${productId}`, {
+        data: { userId: clerkUser.id },
+      });
+
+      if (data.success) {
+        toast.success("Xóa sản phẩm thành công!");
+        // Remove the deleted product from the local state
+        setProducts(products.filter((product) => product._id !== productId));
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa sản phẩm"
+      );
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
+  // Debug Clerk user
+  useEffect(() => {
+    console.log("🔍 Clerk user:", clerkUser);
+    console.log("🔍 Clerk user ID:", clerkUser?.id);
+    console.log("🔍 Is signed in:", !!clerkUser);
+  }, [clerkUser]);
 
   useEffect(() => {
     if (user) {
@@ -53,7 +100,7 @@ const ProductList = () => {
           </h2>
 
           <div
-            className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-lg bg-white shadow-sm"
+            className="flex flex-col items-center max-w-5xl w-full overflow-hidden rounded-lg bg-white shadow-sm"
             style={{ border: "1px solid #e5e7eb" }}
           >
             <table className="table-fixed w-full overflow-hidden">
@@ -84,10 +131,10 @@ const ProductList = () => {
                     Price
                   </th>
                   <th
-                    className="px-4 py-4 font-semibold truncate max-sm:hidden"
+                    className="px-4 py-4 font-semibold truncate"
                     style={{ color: "#101828" }}
                   >
-                    Action
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -150,30 +197,65 @@ const ProductList = () => {
                       ${product.offerPrice}
                     </td>
 
-                    <td className="px-4 py-4 max-sm:hidden">
-                      <button
-                        onClick={() => router.push(`/product/${product._id}`)}
-                        className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 rounded-lg transition-all duration-200 hover:shadow-md font-medium text-sm"
-                        style={{
-                          backgroundColor: "#7b96b6",
-                          color: "white",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = "#6b83a8";
-                          e.target.style.transform = "translateY(-1px)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "#7b96b6";
-                          e.target.style.transform = "translateY(0)";
-                        }}
-                      >
-                        <span className="hidden md:block">Visit</span>
-                        <Image
-                          className="h-3.5 filter brightness-0 invert"
-                          src={assets.redirect_icon}
-                          alt="redirect_icon"
-                        />
-                      </button>
+                    <td className="px-4 py-4">
+                      <div className="flex gap-2">
+                        {/* Visit Button */}
+                        <button
+                          onClick={() => router.push(`/product/${product._id}`)}
+                          className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 rounded-lg transition-all duration-200 hover:shadow-md font-medium text-sm"
+                          style={{
+                            backgroundColor: "#7b96b6",
+                            color: "white",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#6b83a8";
+                            e.target.style.transform = "translateY(-1px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#7b96b6";
+                            e.target.style.transform = "translateY(0)";
+                          }}
+                        >
+                          <span className="hidden md:block">Visit</span>
+                          <Image
+                            className="h-3.5 filter brightness-0 invert"
+                            src={assets.redirect_icon}
+                            alt="redirect_icon"
+                          />
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => deleteProduct(product._id)}
+                          disabled={deleteLoading === product._id}
+                          className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 rounded-lg transition-all duration-200 hover:shadow-md font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            backgroundColor: "#dc2626",
+                            color: "white",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!e.target.disabled) {
+                              e.target.style.backgroundColor = "#b91c1c";
+                              e.target.style.transform = "translateY(-1px)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!e.target.disabled) {
+                              e.target.style.backgroundColor = "#dc2626";
+                              e.target.style.transform = "translateY(0)";
+                            }
+                          }}
+                        >
+                          {deleteLoading === product._id ? (
+                            <span className="animate-spin">⟳</span>
+                          ) : (
+                            <>
+                              <span className="hidden md:block">Delete</span>
+                              <span className="text-sm">🗑️</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

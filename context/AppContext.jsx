@@ -126,18 +126,25 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  const addToCart = async (itemId) => {
+  const addToCart = async (itemId, selectedColor = null) => {
     let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] += 1;
+
+    // Tạo unique key cho item với màu
+    const cartKey = selectedColor ? `${itemId}_${selectedColor.value}` : itemId;
+
+    if (cartData[cartKey]) {
+      cartData[cartKey].quantity += 1;
     } else {
-      cartData[itemId] = 1;
+      cartData[cartKey] = {
+        productId: itemId,
+        quantity: 1,
+        selectedColor: selectedColor,
+      };
     }
     setCartItems(cartData);
 
     if (user) {
       try {
-        // ✅ Dùng fetch cho consistency
         const response = await fetch("/api/cart/update", {
           method: "POST",
           credentials: "include",
@@ -159,18 +166,17 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  const updateCartQuantity = async (itemId, quantity) => {
+  const updateCartQuantity = async (cartKey, quantity) => {
     let cartData = structuredClone(cartItems);
     if (quantity === 0) {
-      delete cartData[itemId];
+      delete cartData[cartKey];
     } else {
-      cartData[itemId] = quantity;
+      cartData[cartKey].quantity = quantity;
     }
     setCartItems(cartData);
 
     if (user) {
       try {
-        // ✅ Dùng fetch cho consistency
         const response = await fetch("/api/cart/update", {
           method: "POST",
           credentials: "include",
@@ -195,8 +201,8 @@ export const AppContextProvider = (props) => {
   const getCartCount = () => {
     let totalCount = 0;
     for (const items in cartItems) {
-      if (cartItems[items] > 0) {
-        totalCount += cartItems[items];
+      if (cartItems[items].quantity > 0) {
+        totalCount += cartItems[items].quantity;
       }
     }
     return totalCount;
@@ -205,9 +211,11 @@ export const AppContextProvider = (props) => {
   const getCartAmount = () => {
     let totalAmount = 0;
     for (const items in cartItems) {
-      let itemInfo = products.find((product) => product._id === items);
-      if (cartItems[items] > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[items];
+      let itemInfo = products.find(
+        (product) => product._id === cartItems[items].productId
+      );
+      if (cartItems[items].quantity > 0) {
+        totalAmount += itemInfo.offerPrice * cartItems[items].quantity;
       }
     }
     return Math.floor(totalAmount * 100) / 100;

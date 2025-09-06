@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import React from "react";
+import toast from "react-hot-toast";
 
 const Product = () => {
   const { id } = useParams();
@@ -17,6 +18,7 @@ const Product = () => {
 
   const [mainImage, setMainImage] = useState(null);
   const [productData, setProductData] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   const fetchProductData = async () => {
     const product = products.find((product) => product._id === id);
@@ -113,7 +115,27 @@ const Product = () => {
                   </tr>
                   <tr>
                     <td className="text-gray-600 font-medium">Color</td>
-                    <td className="text-gray-800/50 ">Multi</td>
+                    <td className="text-gray-800/50">
+                      {productData.colors && productData.colors.length > 0 ? (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {productData.colors.map((color, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-1"
+                              title={color.name}
+                            >
+                              <div
+                                className="w-4 h-4 rounded-full border border-gray-300"
+                                style={{ backgroundColor: color.value }}
+                              ></div>
+                              <span className="text-xs">{color.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span>No colors specified</span>
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <td className="text-gray-600 font-medium">Category</td>
@@ -123,16 +145,54 @@ const Product = () => {
               </table>
             </div>
 
+            {/* Color Selection for Cart */}
+            {productData.colors && productData.colors.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium text-gray-800 mb-3">
+                  Choose Color:
+                </h3>
+                <div className="flex gap-3 flex-wrap">
+                  {productData.colors.map((color, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedColor(color)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all ${
+                        selectedColor?.value === color.value
+                          ? "border-sc-600 bg-sc-50"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      <div
+                        className="w-5 h-5 rounded-full border border-gray-300"
+                        style={{ backgroundColor: color.value }}
+                      ></div>
+                      <span className="text-sm font-medium">{color.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center mt-10 gap-4">
               <button
-                onClick={() => addToCart(productData._id)}
+                onClick={() => {
+                  if (productData.colors?.length > 0 && !selectedColor) {
+                    toast.error("Please select a color first");
+                    return;
+                  }
+                  addToCart(productData._id, selectedColor);
+                }}
                 className="w-full py-3.5 bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition rounded-lg shadow-lg hover:shadow-2xl"
               >
                 Add to Cart
               </button>
               <button
                 onClick={() => {
-                  addToCart(productData._id);
+                  if (productData.colors?.length > 0 && !selectedColor) {
+                    toast.error("Please select a color first");
+                    return;
+                  }
+                  addToCart(productData._id, selectedColor);
                   router.push("/cart");
                 }}
                 className="w-full py-3.5 bg-gradient-to-r from-sc-400 to-sc-700 text-white hover:bg-gradient-to-bl rounded-lg transition shadow-lg hover:shadow-2xl"

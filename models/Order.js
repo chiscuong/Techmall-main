@@ -4,9 +4,13 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema({
     userId: {type:String,required:true,ref:'user'},
     items:[{
-        product:{type: mongoose.Schema.Types.ObjectId, ref:'product', required:true},
-        quantity:{type:Number,required:true}
-    }],
+    product:{type: mongoose.Schema.Types.ObjectId, ref:'product', required:true},
+    quantity:{type:Number,required:true},
+    selectedColor: {
+        name: {type: String},
+        value: {type: String}
+    }
+}],
     amount:{type:Number,required:true},
     address: {type: mongoose.Schema.Types.ObjectId, ref:'address', required:true},
     status:{type:String,required:true,default:'Order Placed'},

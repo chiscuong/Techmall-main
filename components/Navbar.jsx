@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
-import { Menu, X } from "lucide-react"; // icon hamburger và close
+import { Menu, X, ShoppingCart, Package } from "lucide-react";
 
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
@@ -57,10 +57,35 @@ const Navbar = () => {
       </div>
 
       {/* Desktop Right */}
-      <ul className="hidden md:flex items-center gap-4 ">
+      <ul className="hidden md:flex items-center gap-4">
         <Image className="w-4 h-4" src={assets.search_icon} alt="search icon" />
+
         {user ? (
-          <UserButton />
+          <UserButton
+            afterSignOutUrl="/"
+            userProfileMode="navigation"
+            userProfileUrl="/user-profile"
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-8 h-8",
+                userButtonPopoverCard: "shadow-lg border",
+              },
+            }}
+          >
+            <UserButton.MenuItems>
+              <UserButton.Link
+                label="Cart"
+                labelIcon={<ShoppingCart size={16} />}
+                href="/cart"
+              />
+              <UserButton.Link
+                label="My Orders"
+                labelIcon={<Package size={16} />}
+                href="/my-orders"
+              />
+              <UserButton.Action label="manageAccount" />
+            </UserButton.MenuItems>
+          </UserButton>
         ) : (
           <button
             onClick={openSignIn}
@@ -120,7 +145,30 @@ const Navbar = () => {
           )}
 
           {user ? (
-            <UserButton />
+            <UserButton
+              afterSignOutUrl="/"
+              userProfileMode="navigation"
+              userProfileUrl="/user-profile"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-8 h-8",
+                },
+              }}
+            >
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="Cart"
+                  labelIcon={<ShoppingCart size={16} />}
+                  href="/cart"
+                />
+                <UserButton.Link
+                  label="My Orders"
+                  labelIcon={<Package size={16} />}
+                  href="/my-orders"
+                />
+                <UserButton.Action label="manageAccount" />
+              </UserButton.MenuItems>
+            </UserButton>
           ) : (
             <button
               onClick={() => {

@@ -16,12 +16,23 @@ export async function POST(request) {
     await connectDB();
 
     // Tính tổng tiền
-    let amount = 0;
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (!product) throw new Error(`Product ${item.product} not found`);
-      amount += product.offerPrice * item.quantity;
-    }
+let amount = 0;
+const processedItems = [];
+
+for (const item of items) {
+  const productId = item.productId || item.product; // Support both formats
+  const product = await Product.findById(productId);
+  if (!product) throw new Error(`Product ${productId} not found`);
+  
+  amount += product.offerPrice * item.quantity;
+  
+  // Chuẩn hóa item format cho Inngest
+  processedItems.push({
+    product: productId,
+    quantity: item.quantity,
+    selectedColor: item.selectedColor || null
+  });
+}
     // làm rỗng cart khi tạo order
     
 
@@ -29,15 +40,15 @@ export async function POST(request) {
 
     // Gửi event tới Inngest (không lưu trực tiếp vào DB)
     await inngest.send({
-      name: "order/created",
-      data: {
-        userId,
-        address,
-        items,
-        amount: amount + Math.floor(amount * 0.02),
-        date: Date.now(),
-      },
-    });
+  name: "order/created",
+  data: {
+    userId,
+    address,
+    items: processedItems, // Dùng processedItems thay vì items
+    amount: amount + Math.floor(amount * 0.02),
+    date: Date.now(),
+  },
+});
 
     return NextResponse.json({ success: true, message: "Order Placed" });
   } catch (error) {

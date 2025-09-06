@@ -17,8 +17,19 @@ export async function GET(request) {
         Product.length
 
         const orders = await Order.find({userId})
-        .populate('address')
-        .populate('items.product')
+.populate('address')
+.populate({
+  path: 'items.product',
+  select: 'name image price offerPrice colors'
+})
+
+// Filter out items with null products
+const cleanedOrders = orders.map(order => ({
+  ...order.toObject(),
+  items: order.items.filter(item => item.product !== null)
+}))
+
+return NextResponse.json({success:true, orders: cleanedOrders})
 
         return NextResponse.json({success:true,orders})
 
