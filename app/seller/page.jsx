@@ -163,7 +163,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-p-50 to-p-100 py-8 px-4 flex items-center justify-center relative ">
+    <div className="min-h-screen  py-8 px-4 flex items-center justify-center relative ">
       <div className="w-full max-w-4xl mx-auto">
         {/* Form Container */}
         <motion.div

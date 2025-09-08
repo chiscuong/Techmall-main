@@ -25,9 +25,12 @@ const Navbar = () => {
   return (
     <nav className="relative w-full bg-white border-b border-p-200 px-4 md:px-8 py-4 flex items-center justify-between">
       {/* Logo */}
-      <div className="text-3xl font-bold bg-gradient-to-r from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text">
+      <a
+        href="/"
+        className="text-3xl font-bold bg-gradient-to-r from-p-400 via-p-500 to-p-800 text-transparent bg-clip-text"
+      >
         TechMall
-      </div>
+      </a>
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center justify-center gap-6 flex-1">

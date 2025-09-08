@@ -86,11 +86,7 @@ const Orders = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className="md:p-10 p-4 space-y-6">
-          <h2 className="text-xl font-semibold" style={{ color: "#101828" }}>
-            Orders
-          </h2>
-
+        <div className=" flex justify-center md:p-10 p-4 space-y-6">
           <div className="max-w-4xl space-y-4">
             {orders && orders.length > 0 ? (
               orders.map((order, index) => (
