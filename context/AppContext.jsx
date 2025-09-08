@@ -19,7 +19,7 @@ export const AppContextProvider = (props) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY;
   const router = useRouter();
 
-  const { user, isLoaded, isSignedIn } = useUser(); // ✅ Thêm isLoaded, isSignedIn
+  const { user, isLoaded, isSignedIn } = useUser();
   const { getToken } = useAuth();
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);
@@ -29,19 +29,22 @@ export const AppContextProvider = (props) => {
   const fetchProductData = async () => {
     try {
       const { data } = await axios.get("/api/product/list");
+      console.log("🔍 API Response:", data);
+      console.log("🔍 Total products loaded:", data.products?.length);
+
       if (data.success) {
         setProducts(data.products);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
+      console.error("❌ Fetch products error:", error);
       toast.error(error.message);
     }
   };
 
   const fetchUserData = async () => {
     try {
-      // ✅ Kiểm tra role trước khi set
       if (user?.publicMetadata?.role === "seller") {
         setIsSeller(true);
       }
@@ -52,10 +55,9 @@ export const AppContextProvider = (props) => {
         hasUser: !!user,
       });
 
-      // ✅ Thử dùng fetch thay vì axios
       const response = await fetch("/api/user/data", {
         method: "GET",
-        credentials: "include", // Đảm bảo gửi cookies
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -70,7 +72,7 @@ export const AppContextProvider = (props) => {
 
       if (data.success) {
         setUserData(data.user);
-        setCartItems(data.user.cartItems || {}); // ✅ Default to empty object
+        setCartItems(data.user.cartItems || {});
       } else {
         toast.error(data.message);
       }
@@ -80,25 +82,11 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  // ✅ Debug user object và tạo user nếu chưa tồn tại
   const createUserIfNotExists = async () => {
     if (!user) return;
     try {
-      // ✅ THÊM ĐOẠN NÀY để debug
-      console.log("🔍 Full user object:", user);
-      console.log("🔍 User data to send:", {
-        email: user.primaryEmailAddress?.emailAddress,
-        name: user.fullName,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        image: user.imageUrl,
-        hasImage: !!user.imageUrl,
-        publicMetadata: user.publicMetadata,
-      });
-
       console.log("🔍 Creating user if not exists...", user.id);
 
-      // ✅ Dùng fetch thay vì axios
       const response = await fetch("/api/user/create", {
         method: "POST",
         credentials: "include",
@@ -123,6 +111,57 @@ export const AppContextProvider = (props) => {
       });
     } catch (error) {
       console.error("Create user error:", error);
+    }
+  };
+
+  // ✅ Thêm hàm cleanup cart để xóa sản phẩm không tồn tại
+  const cleanupCart = async () => {
+    if (!user || Object.keys(cartItems).length === 0) return;
+
+    let cartData = structuredClone(cartItems);
+    let hasChanges = false;
+
+    // Kiểm tra từng item trong cart
+    for (const cartKey in cartItems) {
+      const productId = cartItems[cartKey].productId;
+
+      // Tìm sản phẩm trong danh sách products
+      const itemInfo = products.find(
+        (product) => product._id === productId || product.id === productId
+      );
+
+      // Nếu sản phẩm không tồn tại, xóa khỏi cart
+      if (!itemInfo) {
+        console.log(`🗑️ Removing non-existent product from cart: ${productId}`);
+        delete cartData[cartKey];
+        hasChanges = true;
+      }
+    }
+
+    // Cập nhật cart nếu có thay đổi
+    if (hasChanges) {
+      setCartItems(cartData);
+
+      // Sync với server
+      try {
+        const response = await fetch("/api/cart/update", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cartData }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          toast.success(
+            "Đã cập nhật giỏ hàng và loại bỏ sản phẩm không tồn tại"
+          );
+        }
+      } catch (error) {
+        console.error("Error updating cart:", error);
+      }
     }
   };
 
@@ -198,26 +237,91 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-      if (cartItems[items].quantity > 0) {
-        totalCount += cartItems[items].quantity;
+  // ✅ Thêm hàm remove khỏi cart
+  const removeFromCart = async (cartKey) => {
+    let cartData = structuredClone(cartItems);
+    delete cartData[cartKey];
+    setCartItems(cartData);
+
+    if (user) {
+      try {
+        const response = await fetch("/api/cart/update", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cartData }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log("Item removed from cart");
+        }
+      } catch (error) {
+        console.error("Error removing from cart:", error);
       }
     }
+  };
+
+  // ✅ Cải tiến hàm getCartCount với error handling
+  const getCartCount = () => {
+    let totalCount = 0;
+
+    for (const cartKey in cartItems) {
+      try {
+        const item = cartItems[cartKey];
+        if (item && item.quantity > 0) {
+          // Kiểm tra sản phẩm có tồn tại không
+          const productId = item.productId;
+          const itemInfo = products.find(
+            (product) => product._id === productId || product.id === productId
+          );
+
+          if (itemInfo) {
+            totalCount += item.quantity;
+          } else {
+            console.warn(`Product ${productId} not found, skipping count`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error counting cart item ${cartKey}:`, error);
+      }
+    }
+
     return totalCount;
   };
 
+  // ✅ Cải tiến hàm getCartAmount với error handling tốt hơn
   const getCartAmount = () => {
     let totalAmount = 0;
-    for (const items in cartItems) {
-      let itemInfo = products.find(
-        (product) => product._id === cartItems[items].productId
-      );
-      if (cartItems[items].quantity > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[items].quantity;
+
+    for (const cartKey in cartItems) {
+      try {
+        const item = cartItems[cartKey];
+        if (!item || item.quantity <= 0) continue;
+
+        // Tìm sản phẩm với cả _id và id để đảm bảo
+        const itemInfo = products.find(
+          (product) =>
+            product._id === item.productId || product.id === item.productId
+        );
+
+        if (itemInfo && itemInfo.offerPrice) {
+          totalAmount += itemInfo.offerPrice * item.quantity;
+        } else if (!itemInfo) {
+          console.warn(`Không tìm thấy sản phẩm với ID: ${item.productId}`);
+          // Tự động xóa sản phẩm không tồn tại khỏi cart
+          removeFromCart(cartKey);
+        }
+      } catch (error) {
+        console.error(
+          `Error calculating amount for cart item ${cartKey}:`,
+          error
+        );
       }
     }
+
     return Math.floor(totalAmount * 100) / 100;
   };
 
@@ -229,7 +333,7 @@ export const AppContextProvider = (props) => {
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
       console.log("✅ User loaded and signed in, calling APIs...");
-      createUserIfNotExists(); // 🟢 Gọi hàm này khi user mới login/signup
+      createUserIfNotExists();
       fetchUserData();
     } else if (isLoaded && !isSignedIn) {
       console.log("❌ User not signed in");
@@ -240,6 +344,13 @@ export const AppContextProvider = (props) => {
     }
   }, [isLoaded, isSignedIn, user]);
 
+  // ✅ Cleanup cart khi products thay đổi
+  useEffect(() => {
+    if (products.length > 0 && Object.keys(cartItems).length > 0) {
+      cleanupCart();
+    }
+  }, [products, user]); // Chạy khi products hoặc user thay đổi
+
   // ✅ Show loading cho đến khi Clerk load xong
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -247,7 +358,7 @@ export const AppContextProvider = (props) => {
 
   const value = {
     user,
-    isSignedIn, // ✅ Expose này để components khác dùng
+    isSignedIn,
     getToken,
     currency,
     router,
@@ -261,8 +372,10 @@ export const AppContextProvider = (props) => {
     setCartItems,
     addToCart,
     updateCartQuantity,
+    removeFromCart, // ✅ Thêm function này
     getCartCount,
     getCartAmount,
+    cleanupCart, // ✅ Thêm function này
   };
 
   return (

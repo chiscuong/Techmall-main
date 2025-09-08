@@ -34,10 +34,6 @@ for (const item of items) {
   });
 }
     // làm rỗng cart khi tạo order
-    
-
-
-
     // Gửi event tới Inngest (không lưu trực tiếp vào DB)
     await inngest.send({
   name: "order/created",
