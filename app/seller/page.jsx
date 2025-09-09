@@ -163,390 +163,470 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="min-h-screen  py-8 px-4 flex items-center justify-center relative ">
-      <div className="w-full max-w-4xl mx-auto">
-        {/* Form Container */}
+    <div className="min-h-screen bg-gradient-to-br from-p-50 via-white to-p-100 py-8">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-p-700 via-p-800 to-p-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+              Add New Product
+            </h1>
+            <p className="text-p-100 text-lg max-w-2xl mx-auto">
+              Create and showcase your amazing products to reach thousands of
+              customers
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-white/5 rounded-full -translate-x-36 -translate-y-36"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="bg-white rounded-3xl shadow-2xl border border-p-200 overflow-hidden"
         >
-          <div className="bg-gradient-to-r from-p-700 to-p-800 p-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <Package size={24} />
-              Product Information
-            </h2>
-          </div>
+          <form onSubmit={handleSubmit} className="p-8 lg:p-12">
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+              {/* Left Column - Image Upload (Takes more space) */}
+              <div className="xl:col-span-2">
+                <div className="mb-8">
+                  <label className="block text-2xl font-bold text-p-800 mb-6 flex items-center gap-3">
+                    <div className="p-2 bg-p-100 rounded-xl">
+                      <ImageIcon size={24} className="text-p-600" />
+                    </div>
+                    Product Images
+                  </label>
 
-          <form onSubmit={handleSubmit} className="p-10 space-y-8">
-            {/* Image Upload Section */}
-            <div>
-              <label className="block text-lg font-semibold text-p-800 mb-4 flex items-center gap-2">
-                <ImageIcon size={20} />
-                Product Images
-              </label>
-
-              <div
-                className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 ${
-                  dragActive
-                    ? "border-p-600 bg-p-50"
-                    : "border-p-300 hover:border-p-500 hover:bg-p-25"
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <div className="text-center mb-6">
-                  <Upload size={48} className="text-p-400 mx-auto mb-4" />
-                  <p className="text-p-600 mb-2">
-                    Drag & drop images here or click to browse
-                  </p>
-                  <p className="text-sm text-p-500">
-                    Maximum 4 images, PNG or JPG format
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {[...Array(4)].map((_, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      className="relative aspect-square"
-                    >
-                      <label
-                        htmlFor={`image${index}`}
-                        className="cursor-pointer block w-full h-full"
+                  <div
+                    className={`border-2 border-dashed rounded-2xl p-8 transition-all duration-300 ${
+                      dragActive
+                        ? "border-p-600 bg-p-50 scale-[1.02]"
+                        : "border-p-300 hover:border-p-500 hover:bg-p-25"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <div className="text-center mb-8">
+                      <motion.div
+                        animate={{ y: [0, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <input
-                          onChange={(e) => {
-                            if (e.target.files[0]) {
-                              const updatedFiles = [...files];
-                              updatedFiles[index] = e.target.files[0];
-                              setFiles(updatedFiles);
-                            }
-                          }}
-                          type="file"
-                          id={`image${index}`}
-                          accept="image/*"
-                          className="hidden"
-                        />
+                        <Upload size={64} className="text-p-400 mx-auto mb-4" />
+                      </motion.div>
+                      <h3 className="text-xl font-semibold text-p-700 mb-2">
+                        Upload Your Product Images
+                      </h3>
+                      <p className="text-p-600 mb-2">
+                        Drag & drop images here or click to browse
+                      </p>
+                      <p className="text-sm text-p-500">
+                        Maximum 4 images, PNG or JPG format (Max 10MB each)
+                      </p>
+                    </div>
 
-                        <div
-                          className={`w-full h-full rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden ${
-                            files[index]
-                              ? "border-green-400 bg-green-50"
-                              : "border-p-300 hover:border-p-500"
-                          }`}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                      {[...Array(4)].map((_, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.05 }}
+                          className="relative aspect-square"
                         >
-                          {files[index] ? (
-                            <div className="relative w-full h-full">
-                              <Image
-                                src={URL.createObjectURL(files[index])}
-                                alt={`Preview ${index}`}
-                                className="w-full h-full object-cover rounded-lg"
-                                width={150}
-                                height={150}
-                              />
-                              <motion.button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  removeFile(index);
-                                }}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg"
-                              >
-                                <X size={16} />
-                              </motion.button>
+                          <label
+                            htmlFor={`image${index}`}
+                            className="cursor-pointer block w-full h-full"
+                          >
+                            <input
+                              onChange={(e) => {
+                                if (e.target.files[0]) {
+                                  const updatedFiles = [...files];
+                                  updatedFiles[index] = e.target.files[0];
+                                  setFiles(updatedFiles);
+                                }
+                              }}
+                              type="file"
+                              id={`image${index}`}
+                              accept="image/*"
+                              className="hidden"
+                            />
+
+                            <div
+                              className={`w-full h-full rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-300 ${
+                                files[index]
+                                  ? "border-green-400 bg-green-50"
+                                  : "border-p-300 hover:border-p-500 hover:bg-p-50"
+                              }`}
+                            >
+                              {files[index] ? (
+                                <div className="relative w-full h-full group">
+                                  <Image
+                                    src={URL.createObjectURL(files[index])}
+                                    alt={`Preview ${index}`}
+                                    className="w-full h-full object-cover rounded-lg"
+                                    width={200}
+                                    height={200}
+                                  />
+                                  <motion.button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      removeFile(index);
+                                    }}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X size={16} />
+                                  </motion.button>
+                                </div>
+                              ) : (
+                                <div className="text-center">
+                                  <Plus
+                                    size={32}
+                                    className="text-p-400 mx-auto mb-2"
+                                  />
+                                  <p className="text-sm text-p-500 font-medium">
+                                    Add Image {index + 1}
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="text-center">
-                              <Plus
-                                size={24}
-                                className="text-p-400 mx-auto mb-2"
-                              />
-                              <p className="text-sm text-p-500">Add Image</p>
-                            </div>
-                          )}
-                        </div>
-                      </label>
-                    </motion.div>
-                  ))}
+                          </label>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color Selection Section */}
+                <div>
+                  <label className="block text-2xl font-bold text-p-800 mb-6 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-red-500 to-blue-500 rounded-xl">
+                      <div className="w-6 h-6 rounded-full bg-white"></div>
+                    </div>
+                    Product Colors
+                  </label>
+
+                  <div className="bg-p-25 rounded-2xl p-6 mb-6">
+                    <p className="text-p-700 font-semibold mb-4">
+                      Choose from predefined colors:
+                    </p>
+                    <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-4">
+                      {predefinedColors.map((color) => (
+                        <motion.div
+                          key={color.value}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="relative cursor-pointer"
+                          onClick={() => toggleColor(color)}
+                        >
+                          <div
+                            className={`w-14 h-14 rounded-full border-4 transition-all duration-200 ${
+                              selectedColors.find(
+                                (c) => c.value === color.value
+                              )
+                                ? "border-p-600 shadow-lg scale-110"
+                                : "border-gray-300 hover:border-p-400"
+                            }`}
+                            style={{ backgroundColor: color.value }}
+                            title={color.name}
+                          >
+                            {selectedColors.find(
+                              (c) => c.value === color.value
+                            ) && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <Check
+                                  size={24}
+                                  className="text-white drop-shadow-lg"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Color Input */}
+                  <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+                    <p className="text-gray-700 font-semibold mb-4">
+                      Or add a custom color:
+                    </p>
+                    <div className="flex gap-4 items-end">
+                      <div className="flex-1">
+                        <input
+                          type="color"
+                          value={customColor}
+                          onChange={(e) => setCustomColor(e.target.value)}
+                          className="w-full h-14 rounded-xl border-2 border-gray-200 cursor-pointer"
+                        />
+                      </div>
+                      <motion.button
+                        type="button"
+                        onClick={addCustomColor}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-4 bg-p-600 text-white rounded-xl hover:bg-p-700 transition-colors font-semibold"
+                        disabled={!customColor}
+                      >
+                        <Plus size={20} />
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Selected Colors Display */}
+                  {selectedColors.length > 0 && (
+                    <div>
+                      <p className="text-p-700 font-semibold mb-4">
+                        Selected colors ({selectedColors.length}):
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {selectedColors.map((color) => (
+                          <motion.div
+                            key={color.value}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="flex items-center gap-3 bg-white border-2 border-p-200 rounded-full px-4 py-2 shadow-sm"
+                          >
+                            <div
+                              className="w-5 h-5 rounded-full border-2 border-gray-300"
+                              style={{ backgroundColor: color.value }}
+                            ></div>
+                            <span className="text-p-700 font-medium">
+                              {color.name}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeColor(color.value)}
+                              className="text-p-400 hover:text-p-600 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Product Details Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* Product Name */}
-              <div>
-                <label className="block text-lg font-semibold text-p-800 mb-3 flex items-center gap-2">
-                  <Package size={18} />
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter product name"
-                  className="w-full px-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                  required
-                />
-              </div>
+              {/* Right Column - Product Details */}
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-p-800 mb-6 flex items-center gap-3">
+                    <div className="p-2 bg-p-100 rounded-xl">
+                      <Package size={24} className="text-p-600" />
+                    </div>
+                    Product Details
+                  </h2>
+                </div>
 
-              {/* Category */}
-              <div>
-                <label className="block text-lg font-semibold text-p-800 mb-3 flex items-center gap-2">
-                  <Tag size={18} />
-                  Category
-                </label>
-                <div className="relative">
+                {/* Product Name */}
+                <div>
+                  <label className="block text-lg font-semibold text-p-800 mb-3">
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter product name"
+                    className="w-full px-4 py-4 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800 text-lg"
+                    onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    required
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-lg font-semibold text-p-800 mb-3">
+                    Category
+                  </label>
                   <select
-                    className="w-full px-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800 appearance-none bg-white"
+                    className="w-full px-4 py-4 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800 text-lg appearance-none bg-white"
                     onChange={(e) => setCategory(e.target.value)}
                     value={category}
                   >
                     {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
-                        {cat.icon} {cat.value}
+                        {cat.value}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
 
-              {/* Original Price */}
-              <div>
-                <label className="block text-lg font-semibold text-p-800 mb-3 flex items-center gap-2">
-                  <DollarSign size={18} />
-                  Original Price
-                </label>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800"
-                  onChange={(e) => setPrice(e.target.value)}
-                  value={price}
-                  required
-                />
-              </div>
-
-              {/* Offer Price */}
-              <div>
-                <label className="block text-lg font-semibold text-p-800 mb-3 flex items-center gap-2">
-                  <Tag size={18} />
-                  Offer Price
-                </label>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800"
-                  onChange={(e) => setOfferPrice(e.target.value)}
-                  value={offerPrice}
-                  required
-                />
-                {price &&
-                  offerPrice &&
-                  parseFloat(offerPrice) < parseFloat(price) && (
-                    <div className="mt-2 flex items-center gap-2 text-green-600 text-sm">
-                      <Check size={16} />
-                      <span>
-                        Discount:{" "}
-                        {Math.round(((price - offerPrice) / price) * 100)}%
-                      </span>
+                {/* Prices */}
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label className="block text-lg font-semibold text-p-800 mb-3">
+                      Original Price
+                    </label>
+                    <div className="relative">
+                      <DollarSign
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-p-500"
+                        size={20}
+                      />
+                      <input
+                        type="number"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-12 pr-4 py-4 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800 text-lg"
+                        onChange={(e) => setPrice(e.target.value)}
+                        value={price}
+                        required
+                      />
                     </div>
-                  )}
-              </div>
-            </div>
-            {/* Color Selection Section */}
-            <div>
-              <label className="block text-lg font-semibold text-p-800 mb-4 flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-blue-500"></div>
-                Product Colors
-              </label>
-
-              {/* Predefined Colors */}
-              <div className="mb-6">
-                <p className="text-sm text-p-600 mb-3">
-                  Choose from predefined colors:
-                </p>
-                <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                  {predefinedColors.map((color) => (
-                    <motion.div
-                      key={color.value}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`relative cursor-pointer`}
-                      onClick={() => toggleColor(color)}
-                    >
-                      <div
-                        className={`w-12 h-12 rounded-full border-4 transition-all duration-200 ${
-                          selectedColors.find((c) => c.value === color.value)
-                            ? "border-p-600 shadow-lg scale-110"
-                            : "border-gray-300 hover:border-p-400"
-                        }`}
-                        style={{ backgroundColor: color.value }}
-                        title={color.name}
-                      >
-                        {selectedColors.find(
-                          (c) => c.value === color.value
-                        ) && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Check
-                              size={20}
-                              className="text-white drop-shadow-lg"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Color Input */}
-              <div className="mb-6">
-                <p className="text-sm text-p-600 mb-3">
-                  Or add a custom color:
-                </p>
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <input
-                      type="color"
-                      value={customColor}
-                      onChange={(e) => setCustomColor(e.target.value)}
-                      className="w-full h-12 rounded-xl border-2 border-p-200 cursor-pointer"
-                    />
                   </div>
-                  <motion.button
-                    type="button"
-                    onClick={addCustomColor}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-4 py-3 bg-p-600 text-white rounded-xl hover:bg-p-700 transition-colors"
-                    disabled={!customColor}
-                  >
-                    <Plus size={20} />
-                  </motion.button>
-                </div>
-              </div>
 
-              {/* Selected Colors Display */}
-              {selectedColors.length > 0 && (
+                  <div>
+                    <label className="block text-lg font-semibold text-p-800 mb-3">
+                      Offer Price
+                    </label>
+                    <div className="relative">
+                      <Tag
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-p-500"
+                        size={20}
+                      />
+                      <input
+                        type="number"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-12 pr-4 py-4 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 text-p-800 text-lg"
+                        onChange={(e) => setOfferPrice(e.target.value)}
+                        value={offerPrice}
+                        required
+                      />
+                    </div>
+                    {price &&
+                      offerPrice &&
+                      parseFloat(offerPrice) < parseFloat(price) && (
+                        <div className="mt-3 flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                          <Check size={18} />
+                          <span className="font-medium">
+                            Discount:{" "}
+                            {Math.round(((price - offerPrice) / price) * 100)}%
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                </div>
+
+                {/* Description */}
                 <div>
-                  <p className="text-sm text-p-600 mb-3">
-                    Selected colors ({selectedColors.length}):
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedColors.map((color) => (
-                      <motion.div
-                        key={color.value}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="flex items-center gap-2 bg-p-50 border border-p-200 rounded-full px-3 py-2"
-                      >
-                        <div
-                          className="w-4 h-4 rounded-full border border-gray-300"
-                          style={{ backgroundColor: color.value }}
-                        ></div>
-                        <span className="text-sm text-p-700">{color.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeColor(color.value)}
-                          className="text-p-400 hover:text-p-600 transition-colors"
-                        >
-                          <X size={14} />
-                        </button>
-                      </motion.div>
-                    ))}
+                  <label className="block text-lg font-semibold text-p-800 mb-3">
+                    Product Description
+                  </label>
+                  <textarea
+                    rows={6}
+                    placeholder="Describe your product in detail..."
+                    className="w-full px-4 py-4 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 resize-none text-p-800 text-lg"
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={description}
+                    required
+                  />
+                  <div className="mt-2 text-sm text-p-500 text-right">
+                    {description.length}/500 characters
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-lg font-semibold text-p-800 mb-3 flex items-center gap-2">
-                <FileText size={18} />
-                Product Description
-              </label>
-              <textarea
-                rows={5}
-                placeholder="Describe your product in detail..."
-                className="w-full px-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 resize-none text-p-800"
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-                required
-              />
-              <div className="mt-2 text-sm text-p-500">
-                {description.length}/500 characters
               </div>
             </div>
 
             {/* Validation Warnings */}
-            <AnimatePresence>
-              {(files.length === 0 ||
-                !name ||
-                !description ||
-                !price ||
-                !offerPrice) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3"
-                >
-                  <AlertCircle
-                    size={20}
-                    className="text-orange-500 flex-shrink-0 mt-0.5"
-                  />
-                  <div>
-                    <h4 className="font-medium text-orange-800 mb-2">
-                      Complete the form
-                    </h4>
-                    <ul className="text-sm text-orange-700 space-y-1">
-                      {files.length === 0 && (
-                        <li>• Add at least one product image</li>
-                      )}
-                      {!name && <li>• Enter product name</li>}
-                      {!description && <li>• Add product description</li>}
-                      {!price && <li>• Set original price</li>}
-                      {!offerPrice && <li>• Set offer price</li>}
-                    </ul>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="mt-12">
+              <AnimatePresence>
+                {(files.length === 0 ||
+                  !name ||
+                  !description ||
+                  !price ||
+                  !offerPrice) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 flex items-start gap-4 mb-8"
+                  >
+                    <AlertCircle
+                      size={24}
+                      className="text-orange-500 flex-shrink-0 mt-1"
+                    />
+                    <div>
+                      <h4 className="font-bold text-orange-800 mb-3 text-lg">
+                        Please complete the following:
+                      </h4>
+                      <ul className="text-orange-700 space-y-2">
+                        {files.length === 0 && (
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            Add at least one product image
+                          </li>
+                        )}
+                        {!name && (
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            Enter product name
+                          </li>
+                        )}
+                        {!description && (
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            Add product description
+                          </li>
+                        )}
+                        {!price && (
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            Set original price
+                          </li>
+                        )}
+                        {!offerPrice && (
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            Set offer price
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Submit Button */}
-            <div className="flex justify-center pt-6">
+            <div className="flex justify-center pt-8">
               <motion.button
                 type="submit"
                 disabled={isLoading}
                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                className={`px-12 py-4 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-2xl ${
+                className={`px-16 py-5 rounded-2xl font-bold text-xl transition-all duration-300 flex items-center gap-4 shadow-2xl ${
                   isLoading
                     ? "bg-p-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-p-700 to-p-800 hover:from-p-800 hover:to-p-900"
+                    : "bg-gradient-to-r from-p-700 via-p-800 to-p-900 hover:from-p-800 hover:via-p-900 hover:to-p-950 hover:shadow-3xl"
                 } text-white`}
               >
                 {isLoading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                     Adding Product...
                   </>
                 ) : (
                   <>
-                    <Plus size={20} />
+                    <Plus size={24} />
                     Add Product
                   </>
                 )}

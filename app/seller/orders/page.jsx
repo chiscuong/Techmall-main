@@ -7,12 +7,29 @@ import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Package,
+  MapPin,
+  DollarSign,
+  Calendar,
+  Eye,
+  CheckCircle,
+  Clock,
+  Truck,
+  XCircle,
+  Filter,
+  Search,
+  ChevronDown,
+} from "lucide-react";
 
 const Orders = () => {
   const { currency, getToken, user } = useAppContext();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchSellerOrders = async () => {
     try {
@@ -46,30 +63,60 @@ const Orders = () => {
     switch (status?.toLowerCase()) {
       case "completed":
       case "delivered":
-        return { bg: "#d1f2eb", color: "#0f5132" };
+        return {
+          bg: "bg-green-100",
+          color: "text-green-800",
+          icon: CheckCircle,
+        };
       case "pending":
-        return { bg: "#fff3cd", color: "#664d03" };
+        return { bg: "bg-yellow-100", color: "text-yellow-800", icon: Clock };
       case "processing":
       case "shipped":
-        return { bg: "#d1ecf1", color: "#0c5460" };
+        return { bg: "bg-blue-100", color: "text-blue-800", icon: Truck };
       case "cancelled":
-        return { bg: "#f8d7da", color: "#721c24" };
+        return { bg: "bg-red-100", color: "text-red-800", icon: XCircle };
       default:
-        return { bg: "#fff3cd", color: "#664d03" };
+        return { bg: "bg-yellow-100", color: "text-yellow-800", icon: Clock };
     }
   };
 
   const getPaymentStatusColor = (paymentStatus) => {
     switch (paymentStatus?.toLowerCase()) {
       case "paid":
-        return { bg: "#d1f2eb", color: "#0f5132" };
+        return { bg: "bg-green-100", color: "text-green-800" };
       case "pending":
-        return { bg: "#fff3cd", color: "#664d03" };
+        return { bg: "bg-yellow-100", color: "text-yellow-800" };
       case "failed":
-        return { bg: "#f8d7da", color: "#721c24" };
+        return { bg: "bg-red-100", color: "text-red-800" };
       default:
-        return { bg: "#fff3cd", color: "#664d03" };
+        return { bg: "bg-yellow-100", color: "text-yellow-800" };
     }
+  };
+
+  // Filter orders
+  const filteredOrders = orders.filter((order) => {
+    const matchesStatus =
+      filterStatus === "all" || order.status?.toLowerCase() === filterStatus;
+    const matchesSearch =
+      order.items?.some((item) =>
+        item.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ||
+      order.address?.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesStatus && (searchTerm === "" || matchesSearch);
+  });
+
+  const getOrderStats = () => {
+    const stats = {
+      total: orders.length,
+      pending: orders.filter((o) => o.status?.toLowerCase() === "pending")
+        .length,
+      processing: orders.filter((o) => o.status?.toLowerCase() === "processing")
+        .length,
+      delivered: orders.filter((o) => o.status?.toLowerCase() === "delivered")
+        .length,
+    };
+    return stats;
   };
 
   useEffect(() => {
@@ -78,219 +125,306 @@ const Orders = () => {
     }
   }, [user]);
 
+  if (loading) {
+    return <Loading />;
+  }
+
+  const stats = getOrderStats();
+
   return (
-    <div
-      className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm"
-      style={{ backgroundColor: "#f9fafb" }}
-    >
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className=" flex justify-center md:p-10 p-4 space-y-6">
-          <div className="max-w-4xl space-y-4">
-            {orders && orders.length > 0 ? (
-              orders.map((order, index) => (
-                <div
-                  key={order._id || index}
-                  className="bg-white rounded-lg shadow-sm p-6 border transition-all duration-200 hover:shadow-md"
-                  style={{ borderColor: "#e5e7eb" }}
-                >
-                  <div className="flex flex-col lg:flex-row gap-6 justify-between">
-                    {/* Product Info */}
-                    <div className="flex-1 flex gap-4 max-w-80">
-                      <div
-                        className="p-3 rounded-lg flex-shrink-0"
-                        style={{ backgroundColor: "#f5f7f9" }}
-                      >
-                        <Image
-                          className="w-12 h-12 object-cover"
-                          src={assets.box_icon}
-                          alt="box_icon"
-                          width={48}
-                          height={48}
-                        />
-                      </div>
+    <div className="min-h-screen bg-gradient-to-br from-p-50 via-white to-p-100">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-p-700 via-p-800 to-p-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col lg:flex-row items-center justify-between"
+          >
+            <div>
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Order Management
+              </h1>
+              <p className="text-p-100 text-lg max-w-2xl">
+                Track and manage all your customer orders in one place
+              </p>
+            </div>
 
-                      <div className="flex flex-col gap-2 min-w-0">
-                        <span
-                          className="font-semibold text-sm leading-5"
-                          style={{ color: "#101828" }}
-                        >
-                          {order.items && order.items.length > 0
-                            ? order.items
-                                .map(
-                                  (item) =>
-                                    `${item.product?.name || "Product"} x ${
-                                      item.quantity || 1
-                                    }`
-                                )
-                                .join(", ")
-                            : "No items"}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="text-xs px-2 py-1 rounded-full font-medium"
-                            style={{
-                              backgroundColor: "#f5eef5",
-                              color: "#b87cb4",
-                            }}
-                          >
-                            {order.items?.length || 0}{" "}
-                            {(order.items?.length || 0) === 1
-                              ? "Item"
-                              : "Items"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 lg:mt-0">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.total}
+                </div>
+                <div className="text-p-200 text-sm">Total Orders</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.pending}
+                </div>
+                <div className="text-p-200 text-sm">Pending</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.processing}
+                </div>
+                <div className="text-p-200 text-sm">Processing</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.delivered}
+                </div>
+                <div className="text-p-200 text-sm">Delivered</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
-                    {/* Shipping Address */}
-                    <div className="flex-1 min-w-0">
-                      <h4
-                        className="font-semibold text-sm mb-2"
-                        style={{ color: "#364153" }}
-                      >
-                        Shipping Address
-                      </h4>
-                      <div
-                        className="text-sm space-y-1"
-                        style={{ color: "#6a7282" }}
-                      >
-                        <p className="font-medium" style={{ color: "#364153" }}>
-                          {order.address?.fullName || "N/A"}
-                        </p>
-                        <p>{order.address?.area || "N/A"}</p>
-                        <p>{`${order.address?.city || ""}, ${
-                          order.address?.state || ""
-                        }`}</p>
-                        <p className="font-medium">
-                          {order.address?.phoneNumber || "N/A"}
-                        </p>
-                      </div>
-                    </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-white/5 rounded-full -translate-x-36 -translate-y-36"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48"></div>
+      </div>
 
-                    {/* Amount */}
-                    <div className="text-center lg:text-left">
-                      <h4
-                        className="font-semibold text-sm mb-2"
-                        style={{ color: "#364153" }}
-                      >
-                        Total Amount
-                      </h4>
-                      <p
-                        className="text-lg font-bold"
-                        style={{ color: "#101828" }}
-                      >
-                        {currency}
-                        {order.amount || 0}
-                      </p>
-                    </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-10 pb-12">
+        {/* Filters & Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-xl border border-p-200 p-6 mb-8"
+        >
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-p-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Search orders, customers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300"
+              />
+            </div>
 
-                    {/* Order Details */}
-                    <div className="text-center lg:text-left min-w-0">
-                      <h4
-                        className="font-semibold text-sm mb-3"
-                        style={{ color: "#364153" }}
-                      >
-                        Order Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-center lg:justify-start">
-                          <span
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: "#f5f7f9",
-                              color: "#5d7298",
-                            }}
-                          >
-                            COD
-                          </span>
-                        </div>
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="appearance-none bg-white border-2 border-p-200 rounded-xl px-4 py-3 pr-10 outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300 font-medium"
+              >
+                <option value="all">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <ChevronDown
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-p-400 pointer-events-none"
+                size={20}
+              />
+            </div>
+          </div>
+        </motion.div>
 
-                        <p style={{ color: "#6a7282" }}>
-                          <span className="font-medium">Date:</span>{" "}
-                          {order.date
-                            ? new Date(order.date).toLocaleDateString()
-                            : "N/A"}
-                        </p>
+        {/* Orders List */}
+        <div className="space-y-6">
+          <AnimatePresence>
+            {filteredOrders && filteredOrders.length > 0 ? (
+              filteredOrders.map((order, index) => {
+                const statusInfo = getStatusColor(order.status || "pending");
+                const paymentInfo = getPaymentStatusColor(
+                  order.paymentStatus || "pending"
+                );
+                const StatusIcon = statusInfo.icon;
 
-                        <div className="space-y-2">
-                          <div className="flex justify-center lg:justify-start">
-                            <span
-                              className="px-2 py-1 rounded-full text-xs font-medium capitalize"
-                              style={getStatusColor(order.status || "pending")}
-                            >
-                              {order.status || "Pending"}
-                            </span>
-                          </div>
-
-                          <div className="flex justify-center lg:justify-start">
-                            <span
-                              className="px-2 py-1 rounded-full text-xs font-medium capitalize"
-                              style={getPaymentStatusColor(
-                                order.paymentStatus || "pending"
-                              )}
-                            >
-                              {order.paymentStatus || "Pending"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Order Actions */}
-                  <div
-                    className="mt-6 pt-4 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-                    style={{ borderTopColor: "#e5e7eb" }}
+                return (
+                  <motion.div
+                    key={order._id || index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white rounded-2xl shadow-xl border border-p-200 overflow-hidden hover:shadow-2xl transition-all duration-300"
                   >
-                    <div className="flex flex-wrap gap-2">
-                      {/* Quick Status Update Buttons */}
-                      {(order.status || "pending").toLowerCase() !==
-                        "delivered" && (
-                        <button
-                          onClick={() =>
-                            updateOrderStatus(order._id, "delivered")
-                          }
-                          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
-                          style={{
-                            backgroundColor: "#d1f2eb",
-                            color: "#0f5132",
-                          }}
-                        >
-                          ✓ Mark Delivered
-                        </button>
-                      )}
+                    <div className="p-8">
+                      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                        {/* Product Info */}
+                        <div className="xl:col-span-1">
+                          <div className="flex items-start gap-4">
+                            <div className="p-4 bg-p-50 rounded-2xl flex-shrink-0">
+                              <Package size={32} className="text-p-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-bold text-lg text-p-800 mb-2 leading-tight">
+                                {order.items && order.items.length > 0
+                                  ? order.items
+                                      .map(
+                                        (item) =>
+                                          `${item.product?.name || "Product"}`
+                                      )
+                                      .join(", ")
+                                  : "No items"}
+                              </h3>
+                              <div className="flex flex-wrap gap-2">
+                                {order.items?.map((item, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="px-3 py-1 bg-p-100 text-p-700 rounded-full text-sm font-medium"
+                                  >
+                                    Qty: {item.quantity || 1}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
-                      {(order.status || "pending").toLowerCase() !==
-                        "processing" &&
-                        (order.status || "pending").toLowerCase() !==
-                          "delivered" && (
-                          <button
-                            onClick={() =>
-                              updateOrderStatus(order._id, "processing")
-                            }
-                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
-                            style={{
-                              backgroundColor: "#d1ecf1",
-                              color: "#0c5460",
-                            }}
-                          >
-                            📦 Mark Processing
-                          </button>
-                        )}
+                        {/* Shipping Address */}
+                        <div className="xl:col-span-1">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-blue-50 rounded-xl">
+                              <MapPin size={24} className="text-blue-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-bold text-gray-800 mb-3">
+                                Shipping To
+                              </h4>
+                              <div className="space-y-1 text-gray-600">
+                                <p className="font-semibold text-gray-800">
+                                  {order.address?.fullName || "N/A"}
+                                </p>
+                                <p className="text-sm">
+                                  {order.address?.area || "N/A"}
+                                </p>
+                                <p className="text-sm">
+                                  {`${order.address?.city || ""}, ${
+                                    order.address?.state || ""
+                                  }`}
+                                </p>
+                                <p className="font-semibold text-sm">
+                                  📱 {order.address?.phoneNumber || "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Order Details */}
+                        <div className="xl:col-span-1">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-green-50 rounded-xl">
+                              <DollarSign
+                                size={24}
+                                className="text-green-600"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-bold text-gray-800 mb-3">
+                                Order Details
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="text-2xl font-bold text-green-600">
+                                  {currency}
+                                  {order.amount || 0}
+                                </div>
+
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Calendar size={16} />
+                                  {order.date
+                                    ? new Date(order.date).toLocaleDateString()
+                                    : "N/A"}
+                                </div>
+
+                                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                                  💰 COD
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status & Actions */}
+                        <div className="xl:col-span-1">
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-gray-800">
+                              Status & Actions
+                            </h4>
+
+                            {/* Status Badges */}
+                            <div className="space-y-2">
+                              <div
+                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl ${statusInfo.bg} ${statusInfo.color} font-semibold`}
+                              >
+                                <StatusIcon size={16} />
+                                <span className="capitalize">
+                                  {order.status || "Pending"}
+                                </span>
+                              </div>
+
+                              <div
+                                className={`inline-flex items-center px-3 py-1 rounded-full ${paymentInfo.bg} ${paymentInfo.color} text-sm font-medium ml-2`}
+                              >
+                                Payment: {order.paymentStatus || "Pending"}
+                              </div>
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div className="flex flex-wrap gap-2">
+                              {(order.status || "pending").toLowerCase() !==
+                                "delivered" && (
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    updateOrderStatus(order._id, "delivered")
+                                  }
+                                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
+                                >
+                                  <CheckCircle size={16} />
+                                  Delivered
+                                </motion.button>
+                              )}
+
+                              {(order.status || "pending").toLowerCase() !==
+                                "processing" &&
+                                (order.status || "pending").toLowerCase() !==
+                                  "delivered" && (
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() =>
+                                      updateOrderStatus(order._id, "processing")
+                                    }
+                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
+                                  >
+                                    <Truck size={16} />
+                                    Process
+                                  </motion.button>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex gap-3">
-                      <button
-                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                        style={{
-                          backgroundColor: "#f5f7f9",
-                          color: "#5d7298",
-                        }}
-                      >
-                        View Details
-                      </button>
+                    {/* Bottom Actions */}
+                    <div className="bg-gray-50 px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="flex gap-3">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                        >
+                          <Eye size={16} />
+                          View Details
+                        </motion.button>
+                      </div>
 
                       <div className="relative">
                         <select
@@ -298,12 +432,7 @@ const Orders = () => {
                           onChange={(e) =>
                             updateOrderStatus(order._id, e.target.value)
                           }
-                          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md appearance-none cursor-pointer pr-8"
-                          style={{
-                            backgroundColor: "#7b96b6",
-                            color: "white",
-                            border: "none",
-                          }}
+                          className="appearance-none bg-p-600 hover:bg-p-700 text-white px-4 py-2 pr-8 rounded-lg font-medium cursor-pointer transition-all duration-200"
                         >
                           <option value="pending">Pending</option>
                           <option value="processing">Processing</option>
@@ -311,53 +440,50 @@ const Orders = () => {
                           <option value="delivered">Delivered</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </div>
+                        <ChevronDown
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-white pointer-events-none"
+                          size={16}
+                        />
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))
+                  </motion.div>
+                );
+              })
             ) : (
               /* Empty State */
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">📋</div>
-                <h3
-                  className="text-xl font-semibold mb-2"
-                  style={{ color: "#101828" }}
-                >
-                  No orders yet
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-2xl shadow-xl border border-p-200 p-16 text-center"
+              >
+                <div className="w-24 h-24 mx-auto mb-6 bg-p-100 rounded-full flex items-center justify-center">
+                  <Package size={48} className="text-p-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  {searchTerm || filterStatus !== "all"
+                    ? "No orders found"
+                    : "No orders yet"}
                 </h3>
-                <p className="mb-6" style={{ color: "#6a7282" }}>
-                  When customers place orders, they'll appear here.
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  {searchTerm || filterStatus !== "all"
+                    ? "Try adjusting your search or filter criteria"
+                    : "When customers place orders, they'll appear here. Start by adding some products to your store."}
                 </p>
-                <button
-                  className="px-6 py-2 rounded-lg transition-all duration-200 hover:shadow-md font-medium"
-                  style={{
-                    backgroundColor: "#7b96b6",
-                    color: "white",
-                  }}
-                >
-                  View Products
-                </button>
-              </div>
+                {!searchTerm && filterStatus === "all" && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-gradient-to-r from-p-600 to-p-700 text-white rounded-xl font-semibold hover:from-p-700 hover:to-p-800 transition-all duration-200"
+                  >
+                    Add Products
+                  </motion.button>
+                )}
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
-      )}
+      </div>
+
       <Footer />
     </div>
   );

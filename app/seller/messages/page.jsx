@@ -1,11 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Mail,
+  MessageSquare,
+  CheckCircle,
+  Trash2,
+  Reply,
+  User,
+  Clock,
+  Search,
+  Filter,
+  MailOpen,
+  AlertCircle,
+  Eye,
+  ChevronDown,
+} from "lucide-react";
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -39,390 +56,360 @@ export default function MessagesPage() {
   };
 
   const filteredMessages = messages.filter((msg) => {
-    if (filter === "unread") return !msg.isRead;
-    if (filter === "read") return msg.isRead;
-    return true;
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "unread" && !msg.isRead) ||
+      (filter === "read" && msg.isRead);
+
+    const matchesSearch =
+      searchTerm === "" ||
+      msg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.message?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesFilter && matchesSearch;
   });
+
+  const getMessageStats = () => {
+    return {
+      total: messages.length,
+      unread: messages.filter((msg) => !msg.isRead).length,
+      read: messages.filter((msg) => msg.isRead).length,
+    };
+  };
 
   if (loading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#f9fafb" }}
-      >
+      <div className="min-h-screen bg-gradient-to-br from-p-50 via-white to-p-100 flex items-center justify-center">
         <div className="text-center">
-          <div
-            className="w-12 h-12 rounded-full border-4 border-t-4 animate-spin mx-auto mb-4"
-            style={{
-              borderColor: "#e5e7eb",
-              borderTopColor: "#7b96b6",
-            }}
-          ></div>
-          <p style={{ color: "#6a7282" }}>Loading messages...</p>
+          <div className="w-16 h-16 border-4 border-p-200 border-t-p-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-p-600 text-lg">Loading messages...</p>
         </div>
       </div>
     );
   }
 
+  const stats = getMessageStats();
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f9fafb" }}>
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: "#101828" }}>
-            Customer Messages
-          </h1>
-          <p style={{ color: "#6a7282" }}>
-            Manage and respond to customer inquiries
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-p-50 via-white to-p-100">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-p-700 via-p-800 to-p-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col lg:flex-row items-center justify-between"
+          >
+            <div>
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Customer Messages
+              </h1>
+              <p className="text-p-100 text-lg max-w-2xl">
+                Manage and respond to customer inquiries efficiently
+              </p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-3 gap-4 mt-8 lg:mt-0">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.total}
+                </div>
+                <div className="text-p-200 text-sm">Total Messages</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.unread}
+                </div>
+                <div className="text-p-200 text-sm">Unread</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {stats.read}
+                </div>
+                <div className="text-p-200 text-sm">Read</div>
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div
-            className="bg-white rounded-lg shadow-sm p-6 border"
-            style={{ borderColor: "#e5e7eb" }}
-          >
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-white/5 rounded-full -translate-x-36 -translate-y-36"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-10 pb-12">
+        {/* Enhanced Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        >
+          <div className="bg-white rounded-2xl shadow-xl border border-p-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium" style={{ color: "#6a7282" }}>
-                  Total Messages
-                </p>
-                <p className="text-2xl font-bold" style={{ color: "#101828" }}>
-                  {messages.length}
-                </p>
+                <p className="text-p-600 font-semibold mb-1">Total Messages</p>
+                <p className="text-3xl font-bold text-p-800">{stats.total}</p>
               </div>
-              <div
-                className="p-3 rounded-lg"
-                style={{ backgroundColor: "#f5f7f9" }}
-              >
-                <svg
-                  className="w-6 h-6"
-                  style={{ color: "#7b96b6" }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
+              <div className="p-4 bg-p-100 rounded-2xl">
+                <Mail size={32} className="text-p-600" />
               </div>
             </div>
           </div>
 
-          <div
-            className="bg-white rounded-lg shadow-sm p-6 border"
-            style={{ borderColor: "#e5e7eb" }}
-          >
+          <div className="bg-white rounded-2xl shadow-xl border border-p-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium" style={{ color: "#6a7282" }}>
+                <p className="text-orange-600 font-semibold mb-1">
                   Unread Messages
                 </p>
-                <p className="text-2xl font-bold" style={{ color: "#101828" }}>
-                  {messages.filter((msg) => !msg.isRead).length}
+                <p className="text-3xl font-bold text-orange-700">
+                  {stats.unread}
                 </p>
               </div>
-              <div
-                className="p-3 rounded-lg"
-                style={{ backgroundColor: "#fff3cd" }}
-              >
-                <svg
-                  className="w-6 h-6"
-                  style={{ color: "#664d03" }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className="p-4 bg-orange-100 rounded-2xl">
+                <AlertCircle size={32} className="text-orange-600" />
               </div>
             </div>
           </div>
 
-          <div
-            className="bg-white rounded-lg shadow-sm p-6 border"
-            style={{ borderColor: "#e5e7eb" }}
-          >
+          <div className="bg-white rounded-2xl shadow-xl border border-p-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium" style={{ color: "#6a7282" }}>
+                <p className="text-green-600 font-semibold mb-1">
                   Read Messages
                 </p>
-                <p className="text-2xl font-bold" style={{ color: "#101828" }}>
-                  {messages.filter((msg) => msg.isRead).length}
+                <p className="text-3xl font-bold text-green-700">
+                  {stats.read}
                 </p>
               </div>
-              <div
-                className="p-3 rounded-lg"
-                style={{ backgroundColor: "#d1f2eb" }}
-              >
-                <svg
-                  className="w-6 h-6"
-                  style={{ color: "#0f5132" }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+              <div className="p-4 bg-green-100 rounded-2xl">
+                <CheckCircle size={32} className="text-green-600" />
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Filter Tabs */}
-        <div className="mb-6">
-          <div
-            className="flex space-x-1 bg-white rounded-lg p-1 shadow-sm border"
-            style={{ borderColor: "#e5e7eb" }}
-          >
-            {["all", "unread", "read"].map((filterType) => (
-              <button
-                key={filterType}
-                onClick={() => setFilter(filterType)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 capitalize ${
-                  filter === filterType ? "shadow-sm" : ""
-                }`}
-                style={{
-                  backgroundColor:
-                    filter === filterType ? "#7b96b6" : "transparent",
-                  color: filter === filterType ? "white" : "#6a7282",
-                }}
-              >
-                {filterType} (
-                {filterType === "all"
-                  ? messages.length
-                  : filterType === "unread"
-                  ? messages.filter((msg) => !msg.isRead).length
-                  : messages.filter((msg) => msg.isRead).length}
-                )
-              </button>
-            ))}
+        {/* Search & Filter */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-xl border border-p-200 p-6 mb-8"
+        >
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-p-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Search messages, customers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border-2 border-p-200 rounded-xl outline-none focus:border-p-600 focus:ring-4 focus:ring-p-200 transition-all duration-300"
+              />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex bg-p-50 rounded-xl p-2">
+              {[
+                { key: "all", label: "All", count: stats.total },
+                { key: "unread", label: "Unread", count: stats.unread },
+                { key: "read", label: "Read", count: stats.read },
+              ].map(({ key, label, count }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                    filter === key
+                      ? "bg-p-600 text-white shadow-lg"
+                      : "text-p-600 hover:bg-p-100"
+                  }`}
+                >
+                  {label} ({count})
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Messages List */}
-        {filteredMessages.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📭</div>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ color: "#101828" }}
-            >
-              {filter === "all" ? "No messages yet" : `No ${filter} messages`}
-            </h3>
-            <p style={{ color: "#6a7282" }}>
-              {filter === "all"
-                ? "Customer messages will appear here when they contact you."
-                : `No ${filter} messages found.`}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredMessages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`bg-white rounded-lg shadow-sm border p-6 transition-all duration-200 hover:shadow-md ${
-                  !msg.isRead ? "ring-2 ring-opacity-20" : ""
-                }`}
-                style={{
-                  borderColor: "#e5e7eb",
-                  ...(!msg.isRead && {
-                    ringColor: "#7b96b6",
-                    borderLeftColor: "#7b96b6",
-                    borderLeftWidth: "4px",
-                  }),
-                }}
+        <div className="space-y-6">
+          <AnimatePresence>
+            {filteredMessages.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-2xl shadow-xl border border-p-200 p-16 text-center"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2
-                        className="font-semibold text-lg"
-                        style={{ color: "#101828" }}
-                      >
-                        {msg.subject || "No Subject"}
-                      </h2>
-                      {!msg.isRead && (
-                        <span
-                          className="px-2 py-1 text-xs font-medium rounded-full"
-                          style={{
-                            backgroundColor: "#fff3cd",
-                            color: "#664d03",
-                          }}
-                        >
-                          New
-                        </span>
-                      )}
-                    </div>
-
-                    <div
-                      className="flex items-center gap-4 text-sm mb-3"
-                      style={{ color: "#6a7282" }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                        <span
-                          className="font-medium"
-                          style={{ color: "#364153" }}
-                        >
-                          {msg.name || "Anonymous"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                          />
-                        </svg>
-                        <span>{msg.email || "No email"}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <span>
-                          {msg.createdAt
-                            ? new Date(msg.createdAt).toLocaleString()
-                            : "No date"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 ml-4">
-                    {!msg.isRead && (
-                      <button
-                        onClick={() => markAsRead(msg._id)}
-                        className="p-2 rounded-lg transition-all duration-200 hover:shadow-sm"
-                        style={{
-                          backgroundColor: "#d1f2eb",
-                          color: "#0f5132",
-                        }}
-                        title="Mark as read"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => deleteMessage(msg._id)}
-                      className="p-2 rounded-lg transition-all duration-200 hover:shadow-sm"
-                      style={{
-                        backgroundColor: "#f8d7da",
-                        color: "#721c24",
-                      }}
-                      title="Delete message"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                <div className="w-24 h-24 mx-auto mb-6 bg-p-100 rounded-full flex items-center justify-center">
+                  <MessageSquare size={48} className="text-p-600" />
                 </div>
-
-                {/* Message Content */}
-                <div
-                  className="p-4 rounded-lg mb-4"
-                  style={{
-                    backgroundColor: "#f9fafb",
-                    borderLeft: "3px solid #7b96b6",
-                  }}
+                <h3 className="text-2xl font-bold text-p-800 mb-4">
+                  {searchTerm || filter !== "all"
+                    ? "No messages found"
+                    : "No messages yet"}
+                </h3>
+                <p className="text-p-600 mb-8 max-w-md mx-auto">
+                  {searchTerm || filter !== "all"
+                    ? "Try adjusting your search or filter criteria"
+                    : "Customer messages will appear here when they contact you through your website."}
+                </p>
+              </motion.div>
+            ) : (
+              filteredMessages.map((msg, index) => (
+                <motion.div
+                  key={msg._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`bg-white rounded-2xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl ${
+                    !msg.isRead
+                      ? "border-orange-200 bg-gradient-to-r from-orange-50 to-white"
+                      : "border-p-200"
+                  }`}
                 >
-                  <p
-                    className="text-sm leading-relaxed whitespace-pre-wrap"
-                    style={{ color: "#364153" }}
-                  >
-                    {msg.message || "No message content"}
-                  </p>
-                </div>
+                  <div className="p-8">
+                    <div className="flex flex-col xl:flex-row gap-8">
+                      {/* Message Header & Content */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex items-start gap-4">
+                            <div
+                              className={`p-3 rounded-2xl ${
+                                !msg.isRead ? "bg-orange-100" : "bg-p-100"
+                              }`}
+                            >
+                              {!msg.isRead ? (
+                                <MailOpen
+                                  size={24}
+                                  className="text-orange-600"
+                                />
+                              ) : (
+                                <Mail size={24} className="text-p-600" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-3 mb-2">
+                                <h2 className="text-2xl font-bold text-p-800">
+                                  {msg.subject || "No Subject"}
+                                </h2>
+                                {!msg.isRead && (
+                                  <span className="px-3 py-1 bg-orange-500 text-white text-sm font-bold rounded-full">
+                                    NEW
+                                  </span>
+                                )}
+                              </div>
 
-                {/* Reply Button */}
-                <div className="flex justify-end">
-                  <button
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
-                    style={{
-                      backgroundColor: "#7b96b6",
-                      color: "white",
-                    }}
-                  >
-                    Reply
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                              <div className="flex flex-wrap items-center gap-6 text-sm text-p-600 mb-4">
+                                <div className="flex items-center gap-2">
+                                  <User size={16} />
+                                  <span className="font-semibold text-p-700">
+                                    {msg.name || "Anonymous"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Mail size={16} />
+                                  <span>{msg.email || "No email"}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Clock size={16} />
+                                  <span>
+                                    {msg.createdAt
+                                      ? new Date(msg.createdAt).toLocaleString()
+                                      : "No date"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Message Content */}
+                        <div className="bg-p-25 border-l-4 border-p-500 rounded-r-xl p-6 mb-6">
+                          <p className="text-p-700 leading-relaxed whitespace-pre-wrap">
+                            {msg.message || "No message content"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Actions Sidebar */}
+                      <div className="xl:w-64 space-y-4">
+                        <h4 className="font-bold text-p-800 mb-4">Actions</h4>
+
+                        <div className="space-y-3">
+                          {!msg.isRead && (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => markAsRead(msg._id)}
+                              className="w-full flex items-center gap-3 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-all duration-200"
+                            >
+                              <CheckCircle size={20} />
+                              Mark as Read
+                            </motion.button>
+                          )}
+
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-p-600 hover:bg-p-700 text-white rounded-xl font-semibold transition-all duration-200"
+                          >
+                            <Reply size={20} />
+                            Reply
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all duration-200"
+                          >
+                            <Eye size={20} />
+                            View Details
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => deleteMessage(msg._id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-200"
+                          >
+                            <Trash2 size={20} />
+                            Delete
+                          </motion.button>
+                        </div>
+
+                        {/* Message Priority/Status */}
+                        <div className="pt-4 border-t border-p-200">
+                          <div className="space-y-2">
+                            <div
+                              className={`px-3 py-2 rounded-lg text-center font-semibold ${
+                                !msg.isRead
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-green-100 text-green-700"
+                              }`}
+                            >
+                              {!msg.isRead ? "🔴 Unread" : "✅ Read"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
