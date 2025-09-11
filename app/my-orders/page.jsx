@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
@@ -13,7 +12,6 @@ import { Package, MapPin, Calendar, CreditCard, Truck } from "lucide-react";
 
 const MyOrders = () => {
   const { currency, getToken, user } = useAppContext();
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +38,29 @@ const MyOrders = () => {
       fetchOrders();
     }
   }, [user]);
+  //delete order
+  const handleDelete = async (orderId) => {
+    if (!confirm("Are you sure to delete this order?")) return;
+    try {
+      const res = await fetch("/api/order/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Order deleted successfully");
+        window.location.reload();
+      } else {
+        alert("Failed: " + data.message);
+      }
+    } catch (err) {
+      console.error("Delete order error:", err);
+      alert("something went wrong!");
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -124,6 +145,12 @@ const MyOrders = () => {
                           {currency}
                           {order.amount}
                         </p>
+                        <button
+                          className="px-3 py-1 rounded-full text-xs font-medium bg-red-500 text-white hover:bg-red-600 transition"
+                          onClick={() => handleDelete(order._id)}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -227,11 +254,14 @@ const MyOrders = () => {
                           </h3>
                           <div className="bg-gray-50 p-4 rounded-xl space-y-2">
                             <div>
-                              <p className=" capitalize text-sm text-gray-600 mt-2">
+                              <p className=" capitalize text-sm text-gray-600 mt-2 rounded-lg bg-gray-100 inline-block px-2 py-1">
                                 payment: {order.paymentMethod}
                               </p>
-                              <p className=" capitalize text-sm text-gray-600 mt-2">
-                                status: {order.paymentStatus}
+                              <p className=" capitalize text-sm text-gray-600 mt-2 rounded-lg bg-gray-100 inline-block px-2 py-1">
+                                Payment status: {order.paymentStatus}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-2 rounded-lg bg-gray-100 inline-block px-2 py-1">
+                                Order status: {order.status}
                               </p>
                             </div>
                           </div>

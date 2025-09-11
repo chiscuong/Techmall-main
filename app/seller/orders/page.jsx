@@ -1,7 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { assets, orderDummyData } from "@/assets/assets";
-import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
@@ -21,6 +19,7 @@ import {
   Filter,
   Search,
   ChevronDown,
+  Trash,
 } from "lucide-react";
 
 const Orders = () => {
@@ -48,14 +47,61 @@ const Orders = () => {
     }
   };
 
-  // Update order status function (local only - không call API)
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order._id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    toast.success(`Order marked as ${newStatus}`);
+  //delete order
+  const handleDelete = async (orderId) => {
+    if (!confirm("Are you sure to delete this order?")) return;
+    try {
+      const res = await fetch("/api/order/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Order deleted successfully");
+        window.location.reload();
+      } else {
+        alert("Failed: " + data.message);
+      }
+    } catch (err) {
+      console.error("Delete order error:", err);
+      alert("something went wrong!");
+    }
+  };
+  // Update order status
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const token = await getToken();
+      const response = await axios.post(
+        "/api/order/update-status",
+        {
+          orderId,
+          newStatus,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.success) {
+        // Update local state sau khi API thành công
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        toast.success(`Order status updated to ${newStatus}`);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Update status error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to update order status"
+      );
+    }
   };
 
   // Status color functions
@@ -343,7 +389,7 @@ const Orders = () => {
                                 </div>
 
                                 <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                                  💰 COD
+                                  💰{order.paymentMethod}
                                 </span>
                               </div>
                             </div>
@@ -356,58 +402,14 @@ const Orders = () => {
                             <h4 className="font-bold text-gray-800">
                               Status & Actions
                             </h4>
-
-                            {/* Status Badges */}
-                            <div className="space-y-2">
-                              <div
-                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl ${statusInfo.bg} ${statusInfo.color} font-semibold`}
-                              >
-                                <StatusIcon size={16} />
-                                <span className="capitalize">
-                                  {order.status || "Pending"}
-                                </span>
-                              </div>
-
-                              <div
-                                className={`inline-flex items-center px-3 py-1 rounded-full ${paymentInfo.bg} ${paymentInfo.color} text-sm font-medium ml-2`}
-                              >
-                                Payment: {order.paymentStatus || "Pending"}
-                              </div>
-                            </div>
-
-                            {/* Quick Actions */}
-                            <div className="flex flex-wrap gap-2">
-                              {(order.status || "pending").toLowerCase() !==
-                                "delivered" && (
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() =>
-                                    updateOrderStatus(order._id, "delivered")
-                                  }
-                                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
-                                >
-                                  <CheckCircle size={16} />
-                                  Delivered
-                                </motion.button>
-                              )}
-
-                              {(order.status || "pending").toLowerCase() !==
-                                "processing" &&
-                                (order.status || "pending").toLowerCase() !==
-                                  "delivered" && (
-                                  <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() =>
-                                      updateOrderStatus(order._id, "processing")
-                                    }
-                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
-                                  >
-                                    <Truck size={16} />
-                                    Process
-                                  </motion.button>
-                                )}
+                            {/* status */}
+                            <div>
+                              <p className="text-sm text-gray-800 ">
+                                Payment: {order.paymentMethod}
+                              </p>
+                              <p className="mt-1 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium cursor-default select-none whitespace-nowrap border-2">
+                                Status: {order.paymentStatus}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -423,6 +425,16 @@ const Orders = () => {
                         >
                           <Eye size={16} />
                           View Details
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-500 border border-gray-200 rounded-lg text-white hover:bg-red-700 transition-all duration-200"
+                          onClick={() => {
+                            handleDelete(order._id);
+                          }}
+                        >
+                          <Trash size={16} />
+                          Delete Order
                         </motion.button>
                       </div>
 
