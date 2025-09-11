@@ -226,7 +226,6 @@ const MyOrders = () => {
                             Payment & Shipping
                           </h3>
                           <div className="bg-gray-50 p-4 rounded-xl space-y-2">
-<<<<<<< HEAD
                             <div>
                               <p className=" capitalize text-sm text-gray-600 mt-2">
                                 payment: {order.paymentMethod}
@@ -234,30 +233,6 @@ const MyOrders = () => {
                               <p className=" capitalize text-sm text-gray-600 mt-2">
                                 status: {order.paymentStatus}
                               </p>
-=======
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="font-medium">
-                                Cash on Delivery
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">
-                                Payment Status:
-                              </span>
-                              <span className="text-orange-600 font-medium">
-                                Pending
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">Shipping:</span>
-                              <span className="flex items-center gap-1 text-green-600 font-medium">
-                                <Truck size={14} />
-                                Free Delivery
-                              </span>
->>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
                             </div>
                           </div>
                         </div>
