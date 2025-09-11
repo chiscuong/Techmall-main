@@ -10,10 +10,13 @@ const EditProduct = () => {
   const router = useRouter();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+<<<<<<< HEAD
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
+=======
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
 
   // Lấy thông tin sản phẩm theo ID
   useEffect(() => {
@@ -22,7 +25,10 @@ const EditProduct = () => {
         const { data } = await axios.get(`/api/product/${id}`);
         if (data.success) {
           setProduct(data.product);
+<<<<<<< HEAD
           setExistingImages(data.product.image || []);
+=======
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
         } else {
           toast.error(data.message);
         }
@@ -35,6 +41,7 @@ const EditProduct = () => {
     if (id) fetchProduct();
   }, [id]);
 
+<<<<<<< HEAD
   // Xử lý chọn file ảnh
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -118,11 +125,21 @@ const EditProduct = () => {
 
       if (data.success) {
         toast.success("✅ Product updated successfully!");
+=======
+  // Submit cập nhật
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.put(`/api/product/update/${id}`, product);
+      if (data.success) {
+        toast.success("Product updated!");
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
         router.push("/seller/product-list");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
+<<<<<<< HEAD
       console.error("Update error:", error);
       toast.error("❌ Update failed. Please try again.");
     } finally {
@@ -526,6 +543,58 @@ const EditProduct = () => {
           </form>
         </div>
       </div>
+=======
+      toast.error("Update failed");
+    }
+  };
+
+  if (loading) return <Loading />;
+
+  if (!product) return <div className="p-6">Product not found</div>;
+
+  return (
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
+      <form onSubmit={handleUpdate} className="space-y-4">
+        <input
+          type="text"
+          value={product.name}
+          onChange={(e) => setProduct({ ...product, name: e.target.value })}
+          className="w-full border p-2 rounded"
+          placeholder="Product name"
+        />
+        <textarea
+          value={product.description}
+          onChange={(e) =>
+            setProduct({ ...product, description: e.target.value })
+          }
+          className="w-full border p-2 rounded"
+          placeholder="Description"
+        />
+        <input
+          type="number"
+          value={product.price}
+          onChange={(e) => setProduct({ ...product, price: e.target.value })}
+          className="w-full border p-2 rounded"
+          placeholder="Price"
+        />
+        <input
+          type="number"
+          value={product.offerPrice}
+          onChange={(e) =>
+            setProduct({ ...product, offerPrice: e.target.value })
+          }
+          className="w-full border p-2 rounded"
+          placeholder="Offer Price"
+        />
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Update
+        </button>
+      </form>
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
     </div>
   );
 };

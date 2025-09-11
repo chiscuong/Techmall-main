@@ -71,9 +71,15 @@ const OrderSummary = () => {
 
       setIsLoading(true);
       let cartItemsArray = Object.keys(cartItems).map((key) => ({
+<<<<<<< HEAD
         product: cartItems[key].productId,
         quantity: cartItems[key].quantity,
         selectedColor: cartItems[key].selectedColor,
+=======
+        product: cartItems[key].productId, // ✅ Lấy productId từ object
+        quantity: cartItems[key].quantity, // ✅ Lấy quantity từ object
+        selectedColor: cartItems[key].selectedColor, // ✅ Thêm thông tin màu
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
       }));
 
       cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0);

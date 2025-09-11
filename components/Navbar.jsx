@@ -63,6 +63,11 @@ const Navbar = () => {
         {user ? (
           <UserButton
             afterSignOutUrl="/"
+<<<<<<< HEAD
+=======
+            userProfileMode="navigation"
+            userProfileUrl="/user-profile"
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
             appearance={{
               elements: {
                 userButtonAvatarBox: "w-8 h-8",
@@ -81,10 +86,14 @@ const Navbar = () => {
                 labelIcon={<Package size={16} />}
                 href="/my-orders"
               />
+<<<<<<< HEAD
               <UserButton.Action
                 label="Manage Account"
                 action="manageAccount"
               />
+=======
+              <UserButton.Action label="manageAccount" />
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
             </UserButton.MenuItems>
           </UserButton>
         ) : (
@@ -148,6 +157,11 @@ const Navbar = () => {
           {user ? (
             <UserButton
               afterSignOutUrl="/"
+<<<<<<< HEAD
+=======
+              userProfileMode="navigation"
+              userProfileUrl="/user-profile"
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
               appearance={{
                 elements: {
                   userButtonAvatarBox: "w-8 h-8",
@@ -165,10 +179,14 @@ const Navbar = () => {
                   labelIcon={<Package size={16} />}
                   href="/my-orders"
                 />
+<<<<<<< HEAD
                 <UserButton.Action
                   label="Manage Account"
                   action="manageAccount"
                 />
+=======
+                <UserButton.Action label="manageAccount" />
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
               </UserButton.MenuItems>
             </UserButton>
           ) : (

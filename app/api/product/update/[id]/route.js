@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Product from "@/models/Product";
+<<<<<<< HEAD
 import { v2 as cloudinary } from "cloudinary";
 
 // Cloudinary config
@@ -9,11 +10,14 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+=======
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
 
 export async function PUT(req, { params }) {
   try {
     await connectDB();
 
+<<<<<<< HEAD
     const body = await req.json();
     const { removedImages = [], image, ...rest } = body; // ✅ tách image + removedImages
 
@@ -38,6 +42,12 @@ export async function PUT(req, { params }) {
       { ...rest, image },  // phải là image (không phải images)
       { new: true }
     );
+=======
+    const body = await req.json(); // Lấy dữ liệu JSON gửi từ client
+    const updated = await Product.findByIdAndUpdate(params.id, body, {
+      new: true,
+    });
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
 
     if (!updated) {
       return NextResponse.json(
@@ -48,7 +58,10 @@ export async function PUT(req, { params }) {
 
     return NextResponse.json({ success: true, product: updated });
   } catch (err) {
+<<<<<<< HEAD
     console.error("❌ Update error:", err);
+=======
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
     return NextResponse.json(
       { success: false, message: err.message },
       { status: 500 }

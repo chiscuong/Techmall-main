@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
+<<<<<<< HEAD
     userId: {type: String, required: true, ref: 'user'},
     items: [{
         product: {type: mongoose.Schema.Types.ObjectId, ref: 'product', required: true},
@@ -37,3 +38,23 @@ const orderSchema = new mongoose.Schema({
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 export default Order;
+=======
+    userId: {type:String,required:true,ref:'user'},
+    items:[{
+    product:{type: mongoose.Schema.Types.ObjectId, ref:'product', required:true},
+    quantity:{type:Number,required:true},
+    selectedColor: {
+        name: {type: String},
+        value: {type: String}
+    }
+}],
+    amount:{type:Number,required:true},
+    address: {type: mongoose.Schema.Types.ObjectId, ref:'address', required:true},
+    status:{type:String,required:true,default:'Order Placed'},
+    date: { type: Date, default: Date.now }
+
+})
+
+const Order = mongoose.models.Order|| mongoose.model('Order',orderSchema)
+export default Order
+>>>>>>> 7229a53716edf37d8dbe4c2f36237be3a0ea9108
