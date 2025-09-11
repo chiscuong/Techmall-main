@@ -4,23 +4,28 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { assets } from "@/assets/assets";
+import Link from "next/link";
 
 const sliderData = [
   {
     id: 1,
-    title: "Experience Pure Sound - Your Perfect Headphones Awaits!",
-    offer: "Limited Time Offer 30% Off",
+    title: "Experience innovation perfected with iPhone 16.",
+    offer: "Limited Time Offer 10% Off",
     buttonText1: "Buy now",
     buttonText2: "Find more",
     videoSrc: assets.videoBanner1,
+    buttonLink1: "/product/68bc1a04abc09ce310697f24",
+    buttonLink2: "/all-products",
   },
   {
     id: 2,
-    title: "Next-Level Gaming Starts Here - Discover PlayStation 5 Today!",
+    title: "MacBook Air: Ultra-thin, ultra-fast, ultra-you.",
     offer: "Hurry up only few lefts!",
     buttonText1: "Shop Now",
     buttonText2: "Explore Deals",
     videoSrc: assets.videoBanner2,
+    buttonLink1: "/product/68bc16b9abc09ce310697e28",
+    buttonLink2: "/all-products",
   },
 ];
 
@@ -91,12 +96,19 @@ const HeaderSlider = () => {
                       transition={{ delay: 0.7, duration: 0.8 }}
                       className="flex flex-col sm:flex-row gap-4"
                     >
-                      <button className="px-8 py-4 bg-white text-p-900 rounded-xl hover:bg-p-50 transition-all duration-300 transform hover:scale-105 shadow-2xl font-bold text-lg">
-                        {slide.buttonText1}
-                      </button>
-                      <button className="px-8 py-4 border-2 border-white text-white bg-p-800/30 backdrop-blur-md rounded-xl hover:bg-white/20 hover:border-p-200 transition-all duration-300 transform hover:scale-105 shadow-2xl font-bold text-lg">
-                        {slide.buttonText2}
-                      </button>
+                      {/* Button 1 using Link */}
+                      <Link href={slide.buttonLink1}>
+                        <button className="px-8 py-4 bg-white text-p-900 rounded-xl hover:bg-p-50 transition-all duration-300 transform hover:scale-105 shadow-2xl font-bold text-lg">
+                          {slide.buttonText1}
+                        </button>
+                      </Link>
+
+                      {/* Button 2 using Link */}
+                      <Link href={slide.buttonLink2}>
+                        <button className="px-8 py-4 border-2 border-white text-white bg-p-800/30 backdrop-blur-md rounded-xl hover:bg-white/20 hover:border-p-200 transition-all duration-300 transform hover:scale-105 shadow-2xl font-bold text-lg">
+                          {slide.buttonText2}
+                        </button>
+                      </Link>
                     </motion.div>
                   </div>
                 </div>

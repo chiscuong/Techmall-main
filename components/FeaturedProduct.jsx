@@ -123,20 +123,6 @@ const FeaturedProduct = () => {
                 </motion.p>
 
                 {/* Button */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ y: 20, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                  className="group/btn flex items-center gap-2 bg-gradient-to-r from-sc-400 to-sc-600 text-neu-900 px-6 py-3 rounded-xl font-semibold text-sm md:text-base hover:bg-p-50 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Explore Now
-                  <ArrowRight
-                    size={18}
-                    className="group-hover/btn:translate-x-1 transition-transform duration-300"
-                  />
-                </motion.button>
               </motion.div>
             </div>
 

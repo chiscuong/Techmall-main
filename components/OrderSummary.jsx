@@ -31,7 +31,7 @@ const OrderSummary = () => {
   const [promoCode, setPromoCode] = useState("");
   const [isPromoApplied, setIsPromoApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [paymentMethod, setPaymentMethod] = useState("COD"); // ✅ Thêm state payment method
   const [userAddresses, setUserAddresses] = useState([]);
 
   const fetchUserAddresses = async () => {
@@ -71,25 +71,42 @@ const OrderSummary = () => {
 
       setIsLoading(true);
       let cartItemsArray = Object.keys(cartItems).map((key) => ({
-        product: key,
-        quantity: cartItems[key],
+        product: cartItems[key].productId,
+        quantity: cartItems[key].quantity,
+        selectedColor: cartItems[key].selectedColor,
       }));
 
       cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0);
       if (cartItemsArray.length === 0) {
         return toast.error("Cart is empty");
       }
+
       const token = await getToken();
 
+      // ✅ Gửi kèm paymentMethod và amount
       const { data } = await axios.post(
         "/api/order/create",
-        { address: selectedAddress._id, items: cartItemsArray },
+        {
+          address: selectedAddress._id,
+          items: cartItemsArray,
+          paymentMethod: paymentMethod, // ✅ Thêm payment method
+          amount: total, // ✅ Thêm total amount
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (data.success) {
-        toast.success(data.message);
-        setCartItems({});
-        router.push("/order-placed");
+        if (paymentMethod === "COD") {
+          // ✅ COD: Lưu ngay và chuyển trang
+          toast.success("Order placed successfully!");
+          setCartItems({});
+          router.push("/order-placed");
+        } else {
+          // ✅ ONLINE: Chuyển đến Stripe checkout
+          toast.success("Redirecting to payment...");
+          setCartItems({});
+          router.push(`/checkout/payment?orderId=${data.orderId}`);
+        }
       } else {
         toast.error(data.message);
       }
@@ -227,7 +244,72 @@ const OrderSummary = () => {
         </div>
 
         <hr className="border-p-200" />
+        {/* Payment Method Selection */}
+        <div>
+          <label className="flex items-center gap-2 text-base font-semibold text-p-800 mb-3">
+            <CreditCard size={18} />
+            Payment Method
+          </label>
+          <div className="space-y-3">
+            {/* COD Option */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                paymentMethod === "COD"
+                  ? "border-p-600 bg-p-50"
+                  : "border-p-200 bg-white hover:border-p-400"
+              }`}
+              onClick={() => setPaymentMethod("COD")}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "COD"}
+                  onChange={() => setPaymentMethod("COD")}
+                  className="w-4 h-4 text-p-600 focus:ring-p-600"
+                />
+                <div className="flex items-center gap-2">
+                  <Truck size={20} className="text-p-600" />
+                  <span className="font-medium text-p-700">
+                    Cash on Delivery
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-p-600 ml-7 mt-1">
+                Pay when your order is delivered
+              </p>
+            </motion.div>
 
+            {/* Online Payment Option */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                paymentMethod === "ONLINE"
+                  ? "border-p-600 bg-p-50"
+                  : "border-p-200 bg-white hover:border-p-400"
+              }`}
+              onClick={() => setPaymentMethod("ONLINE")}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "ONLINE"}
+                  onChange={() => setPaymentMethod("ONLINE")}
+                  className="w-4 h-4 text-p-600 focus:ring-p-600"
+                />
+                <div className="flex items-center gap-2">
+                  <CreditCard size={20} className="text-p-600" />
+                  <span className="font-medium text-p-700">Online Payment</span>
+                </div>
+              </div>
+              <p className="text-sm text-p-600 ml-7 mt-1">
+                Pay securely with card via Stripe
+              </p>
+            </motion.div>
+          </div>
+        </div>
         {/* Order Details */}
         <div className="space-y-4">
           <div className="flex justify-between items-center text-base">

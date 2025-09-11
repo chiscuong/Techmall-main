@@ -3,6 +3,8 @@ import connectDB from "./db";
 import User from "@/models/User";
 import { UserProfile } from "@clerk/nextjs";
 import Order from "@/models/Order";
+import mongoose from "mongoose";
+
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "quickcart-next" });
@@ -65,34 +67,52 @@ async ({event}) => {
     await User.findByIdAndDelete(id)
 }
 )
+//
 
-//inngest function to create user's order database
-export const createUserOder = inngest.createFunction(
-    {
-        id:'create-user-order',
-        batchEvents:{
-            maxSize:5,
-            timeout: '5s'
-        }
+export const createUserOrder = inngest.createFunction(
+  {
+    id: "create-user-order",
+    batchEvents: {
+      maxSize: 5,
+      timeout: "5s",
     },
-     {event:'order/created'},
-        async({events})=>{
+  },
+  { event: "order/created" },
+  async ({ events }) => {
+    await connectDB();
+    console.log("📌 Inngest connected DB:", mongoose.connection.name);
 
-            const orders = events.map((event)=>{
-                return {
-                    userId:event.data.userId,
-                    items:event.data.items,
-                    amount:event.data.amount,
-                    address:event.data.address,
-                    date:event.data.date
-                }
-            })
+    const orders = events.map((event) => ({
+      userId: event.data.userId,
+      items: event.data.items,
+      amount: event.data.amount,
+      address: event.data.address,
+      date: event.data.date,
+    }));
 
-            await connectDB()
-            await Order.insertMany(orders)
+    console.log("📦 Orders to insert:", orders);
 
-            return{success:true,processed:orders.length}
-            
+    // Lưu orders
+    const savedOrders = await Order.insertMany(orders);
+    console.log("✅ Saved orders:", savedOrders.map((o) => o._id));
+
+    // Clear giỏ hàng từng user
+    for (const order of orders) {
+      try {
+        const user = await User.findById(order.userId);
+        if (user) {
+          console.log(`🧑 Found user: ${user._id} | Cart before:`, user.cartItems);
+          user.cartItems = {};
+          await user.save();
+          console.log(`🛒 Cart cleared for user ${user._id} | After:`, user.cartItems);
+        } else {
+          console.warn(`⚠️ User ${order.userId} not found in DB`);
         }
-    
-)
+      } catch (err) {
+        console.error(`❌ Error clearing cart for ${order.userId}:`, err.message);
+      }
+    }
+
+    return { success: true, processed: orders.length };
+  }
+);

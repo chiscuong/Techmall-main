@@ -35,9 +35,25 @@ export async function POST(request) {
         const price = formData.get('price');
         const offerPrice = formData.get('offerPrice');
         const files = formData.getAll('images');
+        const colors = formData.get('colors');
+        console.log('🔍 Raw colors from formData:', colors);
+        let parsedColors = [];
+        if (colors) {
+                try {
+                    parsedColors = JSON.parse(colors);
+                    console.log('✅ Parsed colors:', parsedColors);
+                    console.log('📊 Colors count:', parsedColors.length);
+                } catch (error) {
+                    console.log('❌ Error parsing colors:', error);
+                    parsedColors = [];
+                }
+            } else {
+                console.log('⚠️  No colors data received');
+            }
         if (!files || files.length === 0) {
             return NextResponse.json({success:false, message:'no files uploaded'})
         }
+        
 
         const result = await Promise.all(
             files.map(async(file)=>{
@@ -63,17 +79,25 @@ export async function POST(request) {
         const image = result.map(result => result.secure_url)
 
         await connectDB();
+        console.log('🔍 Creating product with data:', {
+                name,
+                category,
+                colors: parsedColors,
+                colorCount: parsedColors.length
+            });
         const newProduct = await Product.create({
-            userId,
-            name,
-            description,
-            category,
-            price:Number(price),
-            offerPrice:Number(offerPrice),
-            image,
-            date: Date.now()
-        })
-
+                    userId,
+                    name,
+                    description,
+                    category,
+                    price:Number(price),
+                    offerPrice:Number(offerPrice),
+                    colors: parsedColors,
+                    image,
+                    date: Date.now()
+                })
+            console.log('✅ Product created:', newProduct._id);
+console.log('📊 Saved colors:', newProduct.colors);
         return NextResponse.json({success:true, message:'Upload successful',newProduct})
 
     } catch (error) {
