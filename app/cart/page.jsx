@@ -5,6 +5,7 @@ import OrderSummary from "@/components/OrderSummary";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { useAppContext } from "@/context/AppContext";
+import { MoveLeft } from "lucide-react";
 
 const Cart = () => {
   const {
@@ -23,7 +24,7 @@ const Cart = () => {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-8 border-b border-gray-500/30 pb-6">
             <p className="text-2xl md:text-3xl text-gray-500">
-              Your <span className="font-medium text-orange-600">Cart</span>
+              Your <span className="font-medium text-sc-600">Cart</span>
             </p>
             <p className="text-lg md:text-xl text-gray-500/80">
               {getCartCount()} Items
@@ -92,7 +93,7 @@ const Cart = () => {
                             </div>
                           )}
                           <button
-                            className="text-xs text-orange-600 mt-1"
+                            className="text-xs rounded-lg bg-sc-200 text-sc-600 mt-1 shadow-md"
                             onClick={() => updateCartQuantity(cartKey, 0)}
                           >
                             Remove
@@ -150,13 +151,9 @@ const Cart = () => {
           </div>
           <button
             onClick={() => router.push("/all-products")}
-            className="group flex items-center mt-6 gap-2 text-orange-600"
+            className="group flex items-center mt-6 gap-2 text-sc-600"
           >
-            <Image
-              className="group-hover:-translate-x-1 transition"
-              src={assets.arrow_right_icon_colored}
-              alt="arrow_right_icon_colored"
-            />
+            <MoveLeft size={18} />
             Continue Shopping
           </button>
         </div>

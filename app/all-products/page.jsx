@@ -10,6 +10,7 @@ const AllProducts = () => {
   const { products } = useAppContext(); // Giả sử products được lấy từ context
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortOption, setSortOption] = useState("default");
 
   const categories = [
     { value: "All" },
@@ -39,6 +40,42 @@ const AllProducts = () => {
       setFilteredProducts(filtered);
     }
   }, [searchParams, products]);
+  // sort products
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+  const sortData = (data, sortOption) => {
+    if (!data || data.length === 0) return data;
+
+    const sortedData = [...data]; // Clone array để không mutate original
+
+    switch (sortOption) {
+      case "name-asc":
+        return sortedData.sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "")
+        );
+
+      case "name-desc":
+        return sortedData.sort((a, b) =>
+          (b.name || "").localeCompare(a.name || "")
+        );
+
+      case "price-asc":
+        return sortedData.sort(
+          (a, b) =>
+            (a.offerPrice || a.price || 0) - (b.offerPrice || b.price || 0)
+        );
+
+      case "price-desc":
+        return sortedData.sort(
+          (a, b) =>
+            (b.offerPrice || b.price || 0) - (a.offerPrice || a.price || 0)
+        );
+
+      default:
+        return sortedData; // Trả về theo thứ tự gốc
+    }
+  };
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -52,6 +89,8 @@ const AllProducts = () => {
       setFilteredProducts(filtered);
     }
   };
+  // Áp dụng sort lên filtered products
+  const sortedProducts = sortData(filteredProducts, sortOption);
 
   return (
     <>
@@ -81,6 +120,28 @@ const AllProducts = () => {
                       className="text-gray-700 hover:text-p-500"
                     >
                       All Products
+                    </Link>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span className="mx-2 text-gray-400">/</span>
+                    <Link
+                      href="/aboutus"
+                      className="text-gray-700 hover:text-p-500"
+                    >
+                      Aboutus
+                    </Link>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span className="mx-2 text-gray-400">/</span>
+                    <Link
+                      href="/contact"
+                      className="text-gray-700 hover:text-p-500"
+                    >
+                      Contact
                     </Link>
                   </div>
                 </li>
@@ -132,7 +193,7 @@ const AllProducts = () => {
               {/* Results Header */}
               <div className="flex justify-between items-center mb-6">
                 <p className="text-gray-600">
-                  Showing {filteredProducts.length}{" "}
+                  Showing {sortedProducts.length}{" "}
                   {filteredProducts.length === 1 ? "product" : "products"}
                   {selectedCategory && selectedCategory !== "All" && (
                     <span>
@@ -143,7 +204,11 @@ const AllProducts = () => {
                 </p>
 
                 {/* Sort Options */}
-                <select className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-p-500">
+                <select
+                  value={sortOption}
+                  onChange={handleSortChange}
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-p-500"
+                >
                   <option value="default">Sort by</option>
                   <option value="name-asc">Name A-Z</option>
                   <option value="name-desc">Name Z-A</option>
@@ -153,9 +218,9 @@ const AllProducts = () => {
               </div>
 
               {/* Products Grid */}
-              {filteredProducts.length > 0 ? (
+              {sortedProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredProducts.map((product) => (
+                  {sortedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>

@@ -135,7 +135,7 @@ const ProductList = () => {
             </div>
             <button
               onClick={() => router.push("/seller")}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-p-500 to-p-600 text-white font-semibold rounded-xl hover:from-p-700 hover:to-p-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <svg
                 className="w-5 h-5"
